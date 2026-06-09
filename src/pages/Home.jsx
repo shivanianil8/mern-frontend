@@ -67,7 +67,7 @@ export default function Home() {
                 {/* Image or placeholder */}
                 {product.image ? (
                   <img
-                    src={`${BASE_URL}${product.image}`}
+                    src={product.image}
                     alt={product.name}
                     style={styles.cardImage}
                   />
