@@ -6,6 +6,8 @@ import BASE_URL from "../api.js"
 
 export default function AddProduct() {
   const [form, setForm]           = useState({ name: "", price: "" })
+  const [image, setImage]         = useState(null)
+  const [preview, setPreview]     = useState(null)
   const [error, setError]         = useState("")
   const [success, setSuccess]     = useState("")
   const [showPopup, setShowPopup] = useState(false)
@@ -35,6 +37,14 @@ export default function AddProduct() {
     setForm({ ...form, [name]: value })
   }
 
+  const handleImage = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImage(file)
+      setPreview(URL.createObjectURL(file))
+    }
+  }
+
   const validate = () => {
     if (form.name.trim().length < 2) return "Product name must be at least 2 characters"
     if (!form.price || Number(form.price) <= 0) return "Price must be greater than 0"
@@ -46,9 +56,20 @@ export default function AddProduct() {
     const err = validate()
     if (err) { setError(err); return }
     setError("")
+
+    // Use FormData to send image + text together
+    const formData = new FormData()
+    formData.append('name', form.name)
+    formData.append('price', form.price)
+    if (image) formData.append('image', image)
+
     try {
-      await axios.post(`${BASE_URL}/api/products`, form,
-        { headers: { Authorization: `Bearer ${token}` } })
+      await axios.post(`${BASE_URL}/api/products`, formData,
+        { headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
       setSuccess("Product added!")
       setTimeout(() => navigate("/products"), 1500)
     } catch (err) { setError(err.response?.data?.message || "Failed") }
@@ -87,6 +108,29 @@ export default function AddProduct() {
           {success && <p style={styles.success}>{success}</p>}
 
           <form onSubmit={handleSubmit}>
+
+            {/* Image Upload */}
+            <label style={styles.label}>Product Image (optional)</label>
+            <div style={styles.imageUpload}
+              onClick={() => document.getElementById('imageInput').click()}>
+              {preview ? (
+                <img src={preview} alt="preview"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }} />
+              ) : (
+                <div style={styles.uploadPlaceholder}>
+                  <span style={{ fontSize: "2rem" }}>📷</span>
+                  <p style={{ color: "#555555", fontSize: "0.85rem", marginTop: "0.5rem" }}>
+                    Click to upload image
+                  </p>
+                </div>
+              )}
+            </div>
+            <input
+              id="imageInput" type="file"
+              accept="image/*" onChange={handleImage}
+              style={{ display: "none" }}
+            />
+
             <label style={styles.label}>Product Name</label>
             <input style={styles.input} name="name"
               placeholder="Enter product name"
@@ -135,6 +179,13 @@ const styles = {
   title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.5rem" },
   subtitle: { color: "#555555", fontSize: "0.9rem" },
   card: { background: "#111111", borderRadius: "16px", padding: "2rem", border: "1px solid #222222" },
+  imageUpload: {
+    width: "100%", height: "200px", borderRadius: "10px",
+    border: "2px dashed #222222", marginBottom: "20px",
+    cursor: "pointer", overflow: "hidden",
+    display: "flex", alignItems: "center", justifyContent: "center"
+  },
+  uploadPlaceholder: { textAlign: "center" },
   label: { display: "block", color: "#a0a0a0", fontSize: "0.85rem", marginBottom: "8px" },
   input: {
     width: "100%", padding: "12px 16px", margin: "0 0 4px 0",

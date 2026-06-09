@@ -43,7 +43,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Decorative circles */}
         <div style={styles.circle1} />
         <div style={styles.circle2} />
       </div>
@@ -64,13 +63,28 @@ export default function Home() {
           <div style={styles.grid}>
             {products.map(product => (
               <div key={product._id} style={styles.card}>
-                <div style={styles.cardIcon}>🛍️</div>
-                <h3 style={styles.cardName}>{product.name}</h3>
-                <p style={styles.cardPrice}>₹{product.price}</p>
-                <div style={styles.cardFooter}>
-                  <span style={styles.cardSeller}>
-                    by {product.addedBy?.name || "Unknown"}
-                  </span>
+
+                {/* Image or placeholder */}
+                {product.image ? (
+                  <img
+                    src={`${BASE_URL}${product.image}`}
+                    alt={product.name}
+                    style={styles.cardImage}
+                  />
+                ) : (
+                  <div style={styles.cardImagePlaceholder}>
+                    <span style={{ fontSize: "3rem" }}>🛍️</span>
+                  </div>
+                )}
+
+                <div style={styles.cardBody}>
+                  <h3 style={styles.cardName}>{product.name}</h3>
+                  <p style={styles.cardPrice}>₹{product.price}</p>
+                  <div style={styles.cardFooter}>
+                    <span style={styles.cardSeller}>
+                      by {product.addedBy?.name || "Unknown"}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -154,21 +168,31 @@ const styles = {
   },
   card: {
     background: "#111111", borderRadius: "16px",
-    padding: "1.5rem", border: "1px solid #222222",
-    transition: "border-color 0.2s, transform 0.2s",
-    cursor: "pointer"
+    border: "1px solid #222222",
+    overflow: "hidden", cursor: "pointer",
+    transition: "border-color 0.2s, transform 0.2s"
   },
-  cardIcon: { fontSize: "2.5rem", marginBottom: "1rem" },
+  cardImage: {
+    width: "100%", height: "180px",
+    objectFit: "cover"
+  },
+  cardImagePlaceholder: {
+    width: "100%", height: "180px",
+    background: "#1a1a1a",
+    display: "flex", alignItems: "center",
+    justifyContent: "center"
+  },
+  cardBody: { padding: "1.25rem" },
   cardName: {
-    color: "#ffffff", fontSize: "1.1rem",
+    color: "#ffffff", fontSize: "1rem",
     fontWeight: "600", marginBottom: "0.5rem"
   },
   cardPrice: {
-    color: "#7c3aed", fontSize: "1.4rem",
-    fontWeight: "700", marginBottom: "1rem"
+    color: "#7c3aed", fontSize: "1.3rem",
+    fontWeight: "700", marginBottom: "0.75rem"
   },
   cardFooter: {
-    borderTop: "1px solid #222222", paddingTop: "0.75rem"
+    borderTop: "1px solid #1a1a1a", paddingTop: "0.75rem"
   },
   cardSeller: { color: "#555555", fontSize: "0.8rem" }
 }
