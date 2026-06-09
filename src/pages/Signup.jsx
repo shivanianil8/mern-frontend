@@ -3,8 +3,8 @@ import axios from "axios"
 import { useNavigate, Link } from "react-router-dom"
 import BASE_URL from "../api.js"
 
-export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" })
+export default function Signup() {
+  const [form, setForm] = useState({ name: "", email: "", password: "" })
   const [error, setError] = useState("")
   const navigate = useNavigate()
 
@@ -12,8 +12,11 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value })
 
   const validate = () => {
+    if (form.name.trim().length < 2) return "Name must be at least 2 characters"
+    if (form.name.trim().length > 50) return "Name must be less than 50 characters"
     if (!form.email.includes("@") || !form.email.includes(".")) return "Enter a valid email address"
     if (form.password.length < 6) return "Password must be at least 6 characters"
+    if (form.password.length > 20) return "Password must be less than 20 characters"
     return null
   }
 
@@ -23,33 +26,38 @@ export default function Login() {
     if (validationError) { setError(validationError); return }
     setError("")
     try {
-      const { data } = await axios.post(`${BASE_URL}/api/auth/login`, form)
+      const { data } = await axios.post(`${BASE_URL}/api/auth/signup`, form)
       localStorage.setItem("token", data.token)
       localStorage.setItem("user", JSON.stringify(data.user))
       navigate("/dashboard")
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed")
+      setError(err.response?.data?.message || "Signup failed")
     }
   }
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>Welcome Back</h2>
+        <h2>Create Account</h2>
         {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit}>
+          <label style={styles.label}>Full Name</label>
+          <input style={styles.input} name="name"
+            placeholder="Enter your full name"
+            value={form.name} onChange={handleChange}
+            maxLength={50} required />
           <label style={styles.label}>Email</label>
           <input style={styles.input} name="email" type="email"
             placeholder="Enter your email"
             value={form.email} onChange={handleChange} required />
           <label style={styles.label}>Password</label>
           <input style={styles.input} name="password" type="password"
-            placeholder="Enter your password"
+            placeholder="Minimum 6 characters"
             value={form.password} onChange={handleChange}
             maxLength={20} required />
-          <button style={styles.button} type="submit">Login</button>
+          <button style={styles.button} type="submit">Sign Up</button>
         </form>
-        <p>No account? <Link to="/signup">Sign Up</Link></p>
+        <p>Already have an account? <Link to="/login">Login</Link></p>
       </div>
     </div>
   )
