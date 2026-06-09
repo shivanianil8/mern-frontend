@@ -54,7 +54,18 @@ export default function ProductList() {
           <div style={styles.list}>
             {products.map(product => (
               <div key={product._id} style={styles.item}>
-                <div style={styles.itemIcon}>🛍️</div>
+
+                {/* Image or emoji */}
+                {product.image ? (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <div style={styles.itemIcon}>🛍️</div>
+                )}
+
                 <div style={styles.itemInfo}>
                   <h3 style={styles.itemName}>{product.name}</h3>
                   <p style={styles.itemSeller}>by {product.addedBy?.name}</p>
@@ -111,7 +122,12 @@ const styles = {
     border: "1px solid #222222", display: "flex",
     alignItems: "center", gap: "1rem"
   },
-  itemIcon: { fontSize: "1.5rem" },
+  itemImage: {
+    width: "60px", height: "60px",
+    borderRadius: "10px", objectFit: "cover",
+    border: "1px solid #222222", flexShrink: 0
+  },
+  itemIcon: { fontSize: "1.5rem", flexShrink: 0 },
   itemInfo: { flex: 1 },
   itemName: { color: "#ffffff", fontWeight: "600", marginBottom: "0.25rem", fontSize: "0.95rem" },
   itemSeller: { color: "#555555", fontSize: "0.8rem" },
