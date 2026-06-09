@@ -2,13 +2,14 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import Navbar from "../components/Navbar"
+import BASE_URL from "../api.js"
 
 export default function Home() {
   const [products, setProducts] = useState([])
   const token = localStorage.getItem("token")
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products")
+    axios.get(`${BASE_URL}/api/products`)
       .then(({ data }) => setProducts(data.products))
       .catch(err => console.log(err))
   }, [])
@@ -78,9 +79,7 @@ const styles = {
     opacity: 0.8, letterSpacing: "2px",
     textTransform: "uppercase"
   },
-  heroText: {
-    fontSize: "1.1rem", marginBottom: "2rem", opacity: 0.9
-  },
+  heroText: { fontSize: "1.1rem", marginBottom: "2rem", opacity: 0.9 },
   heroBtn: {
     background: "white", color: "#4f46e5",
     padding: "12px 28px", borderRadius: "8px",
@@ -92,7 +91,7 @@ const styles = {
     textDecoration: "none", fontWeight: "bold",
     border: "2px solid white"
   },
-  section:      { padding: "3rem 2rem", maxWidth: "1200px", margin: "0 auto" },
+  section: { padding: "3rem 2rem", maxWidth: "1200px", margin: "0 auto" },
   sectionTitle: { textAlign: "center", marginBottom: "2rem", fontSize: "1.8rem" },
   grid: {
     display: "grid",

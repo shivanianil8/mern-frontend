@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import Navbar from "../components/Navbar"
+import BASE_URL from "../api.js"
 
 export default function ProductList() {
   const [products, setProducts] = useState([])
@@ -9,30 +10,24 @@ export default function ProductList() {
   const navigate = useNavigate()
   const token = localStorage.getItem("token")
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
+  useEffect(() => { fetchProducts() }, [])
 
   const fetchProducts = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/products")
+      const { data } = await axios.get(`${BASE_URL}/api/products`)
       setProducts(data.products)
-    } catch (err) {
-      console.log(err)
-    }
+    } catch (err) { console.log(err) }
   }
 
   const handleDelete = async () => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/products/${deleteId}`,
+        `${BASE_URL}/api/products/${deleteId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       setDeleteId(null)
       fetchProducts()
-    } catch (err) {
-      console.log(err)
-    }
+    } catch (err) { console.log(err) }
   }
 
   return (
@@ -85,7 +80,6 @@ export default function ProductList() {
         )}
       </div>
 
-      {/* Delete Confirmation Popup */}
       {deleteId && (
         <div style={styles.overlay}>
           <div style={styles.popup}>

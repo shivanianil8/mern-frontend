@@ -2,6 +2,7 @@ import { useState } from "react"
 import axios from "axios"
 import { useNavigate, useLocation } from "react-router-dom"
 import Navbar from "../components/Navbar"
+import BASE_URL from "../api.js"
 
 export default function EditProduct() {
   const navigate  = useNavigate()
@@ -17,7 +18,6 @@ export default function EditProduct() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-
     if (name === "price") {
       const numbersOnly = value.replace(/[^0-9]/g, "")
       if (numbersOnly.length <= 7) {
@@ -25,34 +25,25 @@ export default function EditProduct() {
       }
       return
     }
-
     if (name === "name" && value.length > 100) return
-
     setForm({ ...form, [name]: value })
   }
 
   const validate = () => {
-    if (form.name.trim().length < 2) {
-      return "Product name must be at least 2 characters"
-    }
-    if (!form.price || Number(form.price) <= 0) {
-      return "Price must be greater than 0"
-    }
+    if (form.name.trim().length < 2) return "Product name must be at least 2 characters"
+    if (!form.price || Number(form.price) <= 0) return "Price must be greater than 0"
     return null
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const validationError = validate()
-    if (validationError) {
-      setError(validationError)
-      return
-    }
+    if (validationError) { setError(validationError); return }
     setError("")
     const token = localStorage.getItem("token")
     try {
       await axios.put(
-        `http://localhost:5000/api/products/${product._id}`,
+        `${BASE_URL}/api/products/${product._id}`,
         form,
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -72,29 +63,19 @@ export default function EditProduct() {
           {error   && <p style={styles.error}>{error}</p>}
           {success && <p style={styles.success}>{success}</p>}
           <form onSubmit={handleSubmit}>
-            <label style={styles.label}>
-              Product Name (max 100 characters)
-            </label>
+            <label style={styles.label}>Product Name (max 100 characters)</label>
             <input style={styles.input} name="name"
               value={form.name} onChange={handleChange}
               maxLength={100} required />
-            <small style={styles.hint}>
-              {form.name.length}/100 characters
-            </small>
-
+            <small style={styles.hint}>{form.name.length}/100 characters</small>
             <label style={styles.label}>Price (₹)</label>
             <input style={styles.input} name="price"
               value={form.price} onChange={handleChange}
               inputMode="numeric" required />
             <small style={styles.hint}>Numbers only</small>
-
-            <button style={styles.button} type="submit">
-              Save Changes
-            </button>
+            <button style={styles.button} type="submit">Save Changes</button>
             <button style={styles.cancel} type="button"
-              onClick={() => navigate("/products")}>
-              Cancel
-            </button>
+              onClick={() => navigate("/products")}>Cancel</button>
           </form>
         </div>
       </div>
@@ -111,19 +92,13 @@ const styles = {
     background: "white", padding: "2rem", borderRadius: "12px",
     width: "400px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)"
   },
-  label: {
-    display: "block", marginBottom: "4px",
-    fontWeight: "500", color: "#555"
-  },
+  label: { display: "block", marginBottom: "4px", fontWeight: "500", color: "#555" },
   input: {
     width: "100%", padding: "10px", margin: "0 0 4px 0",
     borderRadius: "6px", border: "1px solid #ccc",
     boxSizing: "border-box", fontSize: "1rem"
   },
-  hint: {
-    color: "#aaa", fontSize: "0.75rem",
-    display: "block", marginBottom: "16px"
-  },
+  hint: { color: "#aaa", fontSize: "0.75rem", display: "block", marginBottom: "16px" },
   button: {
     width: "100%", padding: "10px", background: "#4f46e5",
     color: "white", border: "none", borderRadius: "6px",

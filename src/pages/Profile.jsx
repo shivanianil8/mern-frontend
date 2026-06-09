@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import Navbar from "../components/Navbar"
+import BASE_URL from "../api.js"
 
 export default function Profile() {
   const [user, setUser]       = useState(null)
@@ -15,7 +16,7 @@ export default function Profile() {
   const fetchProfile = async () => {
     try {
       const { data } = await axios.get(
-        "http://localhost:5000/api/auth/profile",
+        `${BASE_URL}/api/auth/profile`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       setUser(data.user)
@@ -29,7 +30,6 @@ export default function Profile() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-
     if (name === "phone") {
       const numbersOnly = value.replace(/[^0-9]/g, "")
       if (numbersOnly.length <= 10) {
@@ -37,34 +37,25 @@ export default function Profile() {
       }
       return
     }
-
     if (name === "address" && value.length > 100) return
     if (name === "avatar" && value.length > 200) return
-
     setForm({ ...form, [name]: value })
   }
 
   const validate = () => {
-    if (form.phone && form.phone.length !== 10) {
-      return "Phone number must be exactly 10 digits"
-    }
-    if (form.address && form.address.trim().length < 5) {
-      return "Address must be at least 5 characters"
-    }
+    if (form.phone && form.phone.length !== 10) return "Phone number must be exactly 10 digits"
+    if (form.address && form.address.trim().length < 5) return "Address must be at least 5 characters"
     return null
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const validationError = validate()
-    if (validationError) {
-      setError(validationError)
-      return
-    }
+    if (validationError) { setError(validationError); return }
     setError("")
     try {
       const { data } = await axios.put(
-        "http://localhost:5000/api/auth/profile",
+        `${BASE_URL}/api/auth/profile`,
         form,
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -79,8 +70,7 @@ export default function Profile() {
   }
 
   if (!user) return (
-    <div>
-      <Navbar />
+    <div><Navbar />
       <p style={{ padding: "2rem" }}>Loading...</p>
     </div>
   )
@@ -90,7 +80,6 @@ export default function Profile() {
       <Navbar />
       <div style={styles.container}>
         <div style={styles.card}>
-
           <div style={styles.avatarSection}>
             {user.avatar ? (
               <img src={user.avatar} alt="avatar" style={styles.avatar} />
@@ -143,48 +132,32 @@ export default function Profile() {
             <form onSubmit={handleSubmit} style={styles.infoSection}>
               {error   && <p style={styles.error}>{error}</p>}
               {success && <p style={styles.success}>{success}</p>}
-
               <label style={styles.formLabel}>Phone (10 digits only)</label>
               <input
-                style={styles.input}
-                name="phone"
+                style={styles.input} name="phone"
                 placeholder="Enter 10 digit phone number"
-                value={form.phone}
-                onChange={handleChange}
-                maxLength={10}
-                inputMode="numeric"
+                value={form.phone} onChange={handleChange}
+                maxLength={10} inputMode="numeric"
               />
               <small style={styles.hint2}>{form.phone.length}/10 digits</small>
-
               <label style={styles.formLabel}>Address (max 100 characters)</label>
               <input
-                style={styles.input}
-                name="address"
+                style={styles.input} name="address"
                 placeholder="Enter your address"
-                value={form.address}
-                onChange={handleChange}
+                value={form.address} onChange={handleChange}
                 maxLength={100}
               />
               <small style={styles.hint2}>{form.address.length}/100 characters</small>
-
               <label style={styles.formLabel}>Avatar URL (optional)</label>
               <input
-                style={styles.input}
-                name="avatar"
+                style={styles.input} name="avatar"
                 placeholder="Paste image URL"
-                value={form.avatar}
-                onChange={handleChange}
+                value={form.avatar} onChange={handleChange}
                 maxLength={200}
               />
-
               <button style={styles.saveBtn} type="submit">Save Changes</button>
-              <button
-                style={styles.cancelBtn}
-                type="button"
-                onClick={() => setEditing(false)}
-              >
-                Cancel
-              </button>
+              <button style={styles.cancelBtn} type="button"
+                onClick={() => setEditing(false)}>Cancel</button>
             </form>
           )}
         </div>
@@ -240,14 +213,8 @@ const styles = {
     color: "#f59e0b", fontSize: "0.85rem",
     marginTop: "1rem", textAlign: "center"
   },
-  hint2: {
-    color: "#aaa", fontSize: "0.75rem",
-    display: "block", marginBottom: "12px"
-  },
-  formLabel: {
-    display: "block", marginBottom: "4px",
-    fontWeight: "500", color: "#555"
-  },
+  hint2: { color: "#aaa", fontSize: "0.75rem", display: "block", marginBottom: "12px" },
+  formLabel: { display: "block", marginBottom: "4px", fontWeight: "500", color: "#555" },
   input: {
     width: "100%", padding: "10px", margin: "0 0 4px 0",
     borderRadius: "6px", border: "1px solid #ccc",
