@@ -15,37 +15,51 @@ export default function Home() {
   }, [])
 
   return (
-    <div>
+    <div style={{ background: "#0a0a0a", minHeight: "100vh" }}>
       <Navbar />
 
+      {/* Hero */}
       <div style={styles.hero}>
-        <h1 style={styles.heroTitle}>Vyorra</h1>
-        <p style={styles.heroTagline}>Shop beyond ordinary</p>
-        <p style={styles.heroText}>
-          Discover unique products from sellers around you
-        </p>
+        <div style={styles.heroContent}>
+          <p style={styles.heroTag}>— Premium Marketplace</p>
+          <h1 style={styles.heroTitle}>
+            Shop Beyond<br />
+            <span style={styles.heroAccent}>Ordinary</span>
+          </h1>
+          <p style={styles.heroText}>
+            Discover unique products from verified sellers around you.
+            Buy, sell and trade with confidence.
+          </p>
+          {!token ? (
+            <div style={styles.heroBtns}>
+              <Link to="/signup" style={styles.heroBtn}>Get Started</Link>
+              <Link to="/login"  style={styles.heroBtnOutline}>Login</Link>
+            </div>
+          ) : (
+            <div style={styles.heroBtns}>
+              <Link to="/add-product" style={styles.heroBtn}>Add Product</Link>
+              <Link to="/products"    style={styles.heroBtnOutline}>My Products</Link>
+            </div>
+          )}
+        </div>
 
-        {!token && (
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
-            <Link to="/signup" style={styles.heroBtn}>Get Started</Link>
-            <Link to="/login"  style={styles.heroBtnOutline}>Login</Link>
-          </div>
-        )}
-
-        {token && (
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
-            <Link to="/add-product" style={styles.heroBtn}>Add Product</Link>
-            <Link to="/products"    style={styles.heroBtnOutline}>My Products</Link>
-          </div>
-        )}
+        {/* Decorative circles */}
+        <div style={styles.circle1} />
+        <div style={styles.circle2} />
       </div>
 
+      {/* Products */}
       <div style={styles.section}>
-        <h2 style={styles.sectionTitle}>All Products</h2>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle}>All Products</h2>
+          <p style={styles.sectionSub}>Explore what sellers have listed</p>
+        </div>
+
         {products.length === 0 ? (
-          <p style={{ textAlign: "center", color: "#888" }}>
-            No products yet. Be the first to add one!
-          </p>
+          <div style={styles.empty}>
+            <p style={{ fontSize: "3rem" }}>🛍️</p>
+            <p style={{ color: "#555" }}>No products yet. Be the first to add one!</p>
+          </div>
         ) : (
           <div style={styles.grid}>
             {products.map(product => (
@@ -53,9 +67,11 @@ export default function Home() {
                 <div style={styles.cardIcon}>🛍️</div>
                 <h3 style={styles.cardName}>{product.name}</h3>
                 <p style={styles.cardPrice}>₹{product.price}</p>
-                <p style={styles.cardSeller}>
-                  Added by {product.addedBy?.name || "Unknown"}
-                </p>
+                <div style={styles.cardFooter}>
+                  <span style={styles.cardSeller}>
+                    by {product.addedBy?.name || "Unknown"}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -67,45 +83,92 @@ export default function Home() {
 
 const styles = {
   hero: {
-    background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-    color: "white", textAlign: "center", padding: "5rem 2rem"
+    position: "relative", overflow: "hidden",
+    padding: "8rem 2rem", textAlign: "center",
+    background: "#0a0a0a"
+  },
+  heroContent: { position: "relative", zIndex: 2 },
+  heroTag: {
+    color: "#7c3aed", fontSize: "0.85rem",
+    letterSpacing: "3px", textTransform: "uppercase",
+    marginBottom: "1.5rem"
   },
   heroTitle: {
-    fontSize: "4rem", marginBottom: "0.5rem",
-    letterSpacing: "4px", fontWeight: "bold"
+    fontSize: "4.5rem", fontWeight: "800",
+    color: "#ffffff", lineHeight: 1.1,
+    marginBottom: "1.5rem", letterSpacing: "-1px"
   },
-  heroTagline: {
-    fontSize: "1.1rem", marginBottom: "1rem",
-    opacity: 0.8, letterSpacing: "2px",
-    textTransform: "uppercase"
+  heroAccent: {
+    background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent"
   },
-  heroText: { fontSize: "1.1rem", marginBottom: "2rem", opacity: 0.9 },
+  heroText: {
+    color: "#a0a0a0", fontSize: "1.1rem",
+    maxWidth: "500px", margin: "0 auto 2.5rem",
+    lineHeight: 1.7
+  },
+  heroBtns: {
+    display: "flex", gap: "1rem",
+    justifyContent: "center", flexWrap: "wrap"
+  },
   heroBtn: {
-    background: "white", color: "#4f46e5",
-    padding: "12px 28px", borderRadius: "8px",
-    textDecoration: "none", fontWeight: "bold"
+    background: "#7c3aed", color: "#ffffff",
+    padding: "14px 32px", borderRadius: "10px",
+    textDecoration: "none", fontWeight: "600",
+    fontSize: "0.95rem", letterSpacing: "0.5px"
   },
   heroBtnOutline: {
-    background: "transparent", color: "white",
-    padding: "12px 28px", borderRadius: "8px",
-    textDecoration: "none", fontWeight: "bold",
-    border: "2px solid white"
+    background: "transparent", color: "#ffffff",
+    padding: "14px 32px", borderRadius: "10px",
+    textDecoration: "none", fontWeight: "600",
+    border: "1px solid #333333", fontSize: "0.95rem"
   },
-  section: { padding: "3rem 2rem", maxWidth: "1200px", margin: "0 auto" },
-  sectionTitle: { textAlign: "center", marginBottom: "2rem", fontSize: "1.8rem" },
+  circle1: {
+    position: "absolute", width: "500px", height: "500px",
+    borderRadius: "50%", top: "-200px", right: "-100px",
+    background: "radial-gradient(circle, #7c3aed15, transparent)",
+    zIndex: 1
+  },
+  circle2: {
+    position: "absolute", width: "400px", height: "400px",
+    borderRadius: "50%", bottom: "-150px", left: "-100px",
+    background: "radial-gradient(circle, #a855f715, transparent)",
+    zIndex: 1
+  },
+  section: {
+    maxWidth: "1200px", margin: "0 auto",
+    padding: "5rem 2rem"
+  },
+  sectionHeader: { textAlign: "center", marginBottom: "3rem" },
+  sectionTitle: {
+    color: "#ffffff", fontSize: "2rem",
+    fontWeight: "700", marginBottom: "0.5rem"
+  },
+  sectionSub: { color: "#555555", fontSize: "0.95rem" },
+  empty: { textAlign: "center", padding: "4rem" },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
     gap: "1.5rem"
   },
   card: {
-    background: "white", borderRadius: "12px",
-    padding: "1.5rem", textAlign: "center",
-    boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-    border: "1px solid #f0f0f0"
+    background: "#111111", borderRadius: "16px",
+    padding: "1.5rem", border: "1px solid #222222",
+    transition: "border-color 0.2s, transform 0.2s",
+    cursor: "pointer"
   },
-  cardIcon:   { fontSize: "3rem", marginBottom: "0.5rem" },
-  cardName:   { fontSize: "1.1rem", fontWeight: "bold", marginBottom: "0.5rem" },
-  cardPrice:  { fontSize: "1.3rem", color: "#4f46e5", fontWeight: "bold" },
-  cardSeller: { fontSize: "0.8rem", color: "#888", marginTop: "0.5rem" }
+  cardIcon: { fontSize: "2.5rem", marginBottom: "1rem" },
+  cardName: {
+    color: "#ffffff", fontSize: "1.1rem",
+    fontWeight: "600", marginBottom: "0.5rem"
+  },
+  cardPrice: {
+    color: "#7c3aed", fontSize: "1.4rem",
+    fontWeight: "700", marginBottom: "1rem"
+  },
+  cardFooter: {
+    borderTop: "1px solid #222222", paddingTop: "0.75rem"
+  },
+  cardSeller: { color: "#555555", fontSize: "0.8rem" }
 }

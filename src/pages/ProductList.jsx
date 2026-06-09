@@ -21,80 +21,71 @@ export default function ProductList() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(
-        `${BASE_URL}/api/products/${deleteId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      await axios.delete(`${BASE_URL}/api/products/${deleteId}`,
+        { headers: { Authorization: `Bearer ${token}` } })
       setDeleteId(null)
       fetchProducts()
     } catch (err) { console.log(err) }
   }
 
   return (
-    <div>
+    <div style={{ background: "#0a0a0a", minHeight: "100vh" }}>
       <Navbar />
       <div style={styles.container}>
         <div style={styles.header}>
-          <h2>My Products</h2>
-          <button style={styles.addBtn}
-            onClick={() => navigate("/add-product")}>
+          <div>
+            <h2 style={styles.title}>My Products</h2>
+            <p style={styles.subtitle}>{products.length} products listed</p>
+          </div>
+          <button style={styles.addBtn} onClick={() => navigate("/add-product")}>
             + Add Product
           </button>
         </div>
 
         {products.length === 0 ? (
-          <p style={{ color: "#888", textAlign: "center" }}>
-            No products yet. Add your first one!
-          </p>
+          <div style={styles.empty}>
+            <p style={{ fontSize: "3rem" }}>📦</p>
+            <p style={{ color: "#555" }}>No products yet</p>
+            <button style={styles.addBtn} onClick={() => navigate("/add-product")}>
+              Add your first product
+            </button>
+          </div>
         ) : (
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.thead}>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Price</th>
-                <th style={styles.th}>Added By</th>
-                <th style={styles.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map(product => (
-                <tr key={product._id} style={styles.tr}>
-                  <td style={styles.td}>{product.name}</td>
-                  <td style={styles.td}>₹{product.price}</td>
-                  <td style={styles.td}>{product.addedBy?.name}</td>
-                  <td style={styles.td}>
-                    <button style={styles.editBtn}
-                      onClick={() => navigate(`/edit-product/${product._id}`,
-                        { state: product })}>
-                      Edit
-                    </button>
-                    <button style={styles.deleteBtn}
-                      onClick={() => setDeleteId(product._id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={styles.list}>
+            {products.map(product => (
+              <div key={product._id} style={styles.item}>
+                <div style={styles.itemIcon}>🛍️</div>
+                <div style={styles.itemInfo}>
+                  <h3 style={styles.itemName}>{product.name}</h3>
+                  <p style={styles.itemSeller}>by {product.addedBy?.name}</p>
+                </div>
+                <p style={styles.itemPrice}>₹{product.price}</p>
+                <div style={styles.itemActions}>
+                  <button style={styles.editBtn}
+                    onClick={() => navigate(`/edit-product/${product._id}`, { state: product })}>
+                    Edit
+                  </button>
+                  <button style={styles.deleteBtn}
+                    onClick={() => setDeleteId(product._id)}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
       {deleteId && (
         <div style={styles.overlay}>
           <div style={styles.popup}>
-            <h3>Are you sure?</h3>
-            <p style={{ color: "#888" }}>
-              This product will be permanently deleted.
+            <h3 style={{ color: "#ffffff", marginBottom: "0.5rem" }}>Delete Product?</h3>
+            <p style={{ color: "#555555", marginBottom: "1.5rem", fontSize: "0.9rem" }}>
+              This cannot be undone.
             </p>
-            <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-              <button style={styles.confirmDelete} onClick={handleDelete}>
-                Yes, Delete
-              </button>
-              <button style={styles.cancelDelete}
-                onClick={() => setDeleteId(null)}>
-                Cancel
-              </button>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button style={styles.confirmBtn} onClick={handleDelete}>Delete</button>
+              <button style={styles.cancelBtn} onClick={() => setDeleteId(null)}>Cancel</button>
             </div>
           </div>
         </div>
@@ -104,49 +95,51 @@ export default function ProductList() {
 }
 
 const styles = {
-  container: { maxWidth: "900px", margin: "3rem auto", padding: "0 2rem" },
-  header: {
-    display: "flex", justifyContent: "space-between",
-    alignItems: "center", marginBottom: "2rem"
-  },
+  container: { maxWidth: "800px", margin: "0 auto", padding: "4rem 2rem" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" },
+  title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.25rem" },
+  subtitle: { color: "#555555", fontSize: "0.9rem" },
   addBtn: {
-    background: "#4f46e5", color: "white", border: "none",
-    padding: "10px 20px", borderRadius: "8px", cursor: "pointer"
+    background: "#7c3aed", color: "#ffffff", border: "none",
+    padding: "10px 20px", borderRadius: "10px", cursor: "pointer",
+    fontWeight: "600", fontSize: "0.9rem"
   },
-  table: { width: "100%", borderCollapse: "collapse" },
-  thead: { background: "#f8f8f8" },
-  th: { padding: "12px 16px", textAlign: "left", fontWeight: "600",
-        borderBottom: "2px solid #eee" },
-  tr: { borderBottom: "1px solid #eee" },
-  td: { padding: "12px 16px" },
+  empty: { textAlign: "center", padding: "4rem", color: "#555555" },
+  list: { display: "flex", flexDirection: "column", gap: "1rem" },
+  item: {
+    background: "#111111", borderRadius: "12px", padding: "1.25rem 1.5rem",
+    border: "1px solid #222222", display: "flex",
+    alignItems: "center", gap: "1rem"
+  },
+  itemIcon: { fontSize: "1.5rem" },
+  itemInfo: { flex: 1 },
+  itemName: { color: "#ffffff", fontWeight: "600", marginBottom: "0.25rem", fontSize: "0.95rem" },
+  itemSeller: { color: "#555555", fontSize: "0.8rem" },
+  itemPrice: { color: "#7c3aed", fontWeight: "700", fontSize: "1.1rem" },
+  itemActions: { display: "flex", gap: "0.5rem" },
   editBtn: {
-    background: "#4f46e5", color: "white", border: "none",
-    padding: "6px 14px", borderRadius: "6px",
-    cursor: "pointer", marginRight: "8px"
+    background: "#1a1a1a", color: "#ffffff", border: "1px solid #333",
+    padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem"
   },
   deleteBtn: {
-    background: "#ef4444", color: "white", border: "none",
-    padding: "6px 14px", borderRadius: "6px", cursor: "pointer"
+    background: "#ef444415", color: "#ef4444", border: "1px solid #ef444430",
+    padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem"
   },
   overlay: {
-    position: "fixed", top: 0, left: 0,
-    width: "100%", height: "100%",
-    background: "rgba(0,0,0,0.5)",
-    display: "flex", justifyContent: "center", alignItems: "center"
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    background: "rgba(0,0,0,0.8)", display: "flex",
+    justifyContent: "center", alignItems: "center"
   },
   popup: {
-    background: "white", padding: "2rem",
-    borderRadius: "12px", textAlign: "center",
-    width: "320px", boxShadow: "0 4px 20px rgba(0,0,0,0.2)"
+    background: "#111111", padding: "2rem", borderRadius: "16px",
+    textAlign: "center", width: "320px", border: "1px solid #222222"
   },
-  confirmDelete: {
-    background: "#ef4444", color: "white", border: "none",
-    padding: "10px 20px", borderRadius: "6px",
-    cursor: "pointer", flex: 1
+  confirmBtn: {
+    flex: 1, padding: "10px", background: "#ef4444", color: "#ffffff",
+    border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "600"
   },
-  cancelDelete: {
-    background: "#f0f0f0", color: "#333", border: "none",
-    padding: "10px 20px", borderRadius: "6px",
-    cursor: "pointer", flex: 1
+  cancelBtn: {
+    flex: 1, padding: "10px", background: "#1a1a1a", color: "#a0a0a0",
+    border: "1px solid #222222", borderRadius: "8px", cursor: "pointer"
   }
 }

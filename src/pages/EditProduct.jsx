@@ -9,20 +9,15 @@ export default function EditProduct() {
   const location  = useLocation()
   const product   = location.state
 
-  const [form, setForm]   = useState({
-    name:  product?.name  || "",
-    price: product?.price || ""
-  })
-  const [error,   setError]   = useState("")
+  const [form, setForm]     = useState({ name: product?.name || "", price: product?.price || "" })
+  const [error, setError]   = useState("")
   const [success, setSuccess] = useState("")
 
   const handleChange = (e) => {
     const { name, value } = e.target
     if (name === "price") {
-      const numbersOnly = value.replace(/[^0-9]/g, "")
-      if (numbersOnly.length <= 7) {
-        setForm({ ...form, price: numbersOnly })
-      }
+      const n = value.replace(/[^0-9]/g, "")
+      if (n.length <= 7) setForm({ ...form, price: n })
       return
     }
     if (name === "name" && value.length > 100) return
@@ -37,42 +32,43 @@ export default function EditProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const validationError = validate()
-    if (validationError) { setError(validationError); return }
+    const err = validate()
+    if (err) { setError(err); return }
     setError("")
     const token = localStorage.getItem("token")
     try {
-      await axios.put(
-        `${BASE_URL}/api/products/${product._id}`,
-        form,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      await axios.put(`${BASE_URL}/api/products/${product._id}`, form,
+        { headers: { Authorization: `Bearer ${token}` } })
       setSuccess("Product updated!")
       setTimeout(() => navigate("/products"), 1500)
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to update")
-    }
+    } catch (err) { setError(err.response?.data?.message || "Failed") }
   }
 
   return (
-    <div>
+    <div style={{ background: "#0a0a0a", minHeight: "100vh" }}>
       <Navbar />
       <div style={styles.container}>
+        <div style={styles.header}>
+          <h2 style={styles.title}>Edit Product</h2>
+          <p style={styles.subtitle}>Update your product details</p>
+        </div>
+
         <div style={styles.card}>
-          <h2>Edit Product</h2>
           {error   && <p style={styles.error}>{error}</p>}
           {success && <p style={styles.success}>{success}</p>}
+
           <form onSubmit={handleSubmit}>
-            <label style={styles.label}>Product Name (max 100 characters)</label>
+            <label style={styles.label}>Product Name</label>
             <input style={styles.input} name="name"
               value={form.name} onChange={handleChange}
               maxLength={100} required />
-            <small style={styles.hint}>{form.name.length}/100 characters</small>
+            <small style={styles.hint}>{form.name.length}/100</small>
+
             <label style={styles.label}>Price (₹)</label>
             <input style={styles.input} name="price"
               value={form.price} onChange={handleChange}
               inputMode="numeric" required />
-            <small style={styles.hint}>Numbers only</small>
+
             <button style={styles.button} type="submit">Save Changes</button>
             <button style={styles.cancel} type="button"
               onClick={() => navigate("/products")}>Cancel</button>
@@ -84,32 +80,29 @@ export default function EditProduct() {
 }
 
 const styles = {
-  container: {
-    display: "flex", justifyContent: "center",
-    alignItems: "center", minHeight: "80vh", background: "#f0f2f5"
-  },
-  card: {
-    background: "white", padding: "2rem", borderRadius: "12px",
-    width: "400px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)"
-  },
-  label: { display: "block", marginBottom: "4px", fontWeight: "500", color: "#555" },
+  container: { maxWidth: "500px", margin: "0 auto", padding: "4rem 2rem" },
+  header: { marginBottom: "2rem" },
+  title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.5rem" },
+  subtitle: { color: "#555555", fontSize: "0.9rem" },
+  card: { background: "#111111", borderRadius: "16px", padding: "2rem", border: "1px solid #222222" },
+  label: { display: "block", color: "#a0a0a0", fontSize: "0.85rem", marginBottom: "8px" },
   input: {
-    width: "100%", padding: "10px", margin: "0 0 4px 0",
-    borderRadius: "6px", border: "1px solid #ccc",
-    boxSizing: "border-box", fontSize: "1rem"
+    width: "100%", padding: "12px 16px", margin: "0 0 4px 0",
+    borderRadius: "10px", border: "1px solid #222222",
+    background: "#0a0a0a", color: "#ffffff", fontSize: "1rem",
+    boxSizing: "border-box", outline: "none"
   },
-  hint: { color: "#aaa", fontSize: "0.75rem", display: "block", marginBottom: "16px" },
+  hint: { color: "#333333", fontSize: "0.75rem", display: "block", marginBottom: "20px" },
   button: {
-    width: "100%", padding: "10px", background: "#4f46e5",
-    color: "white", border: "none", borderRadius: "6px",
-    cursor: "pointer", marginBottom: "8px",
-    marginTop: "1rem", fontSize: "1rem"
+    width: "100%", padding: "14px", background: "#7c3aed",
+    color: "#ffffff", border: "none", borderRadius: "10px",
+    cursor: "pointer", fontWeight: "600", marginTop: "1rem"
   },
   cancel: {
-    width: "100%", padding: "10px", background: "#f0f0f0",
-    color: "#333", border: "none", borderRadius: "6px",
-    cursor: "pointer", fontSize: "1rem"
+    width: "100%", padding: "14px", background: "transparent",
+    color: "#555555", border: "1px solid #222222", borderRadius: "10px",
+    cursor: "pointer", marginTop: "8px"
   },
-  error:   { color: "red", marginBottom: "10px" },
-  success: { color: "green", marginBottom: "10px" }
+  error: { color: "#ef4444", fontSize: "0.85rem", marginBottom: "1rem", padding: "10px", background: "#ef444410", borderRadius: "8px" },
+  success: { color: "#22c55e", fontSize: "0.85rem", marginBottom: "1rem", padding: "10px", background: "#22c55e10", borderRadius: "8px" }
 }

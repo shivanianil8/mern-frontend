@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom"
+import { theme as t } from "../theme"
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -12,7 +13,10 @@ export default function Navbar() {
 
   return (
     <nav style={styles.nav}>
-      <Link to="/" style={styles.logo}>Vyorra</Link>
+      <Link to="/" style={styles.logo}>
+        <span style={styles.logoText}>Vyorra</span>
+      </Link>
+
       <div style={styles.links}>
         {token ? (
           <>
@@ -38,22 +42,29 @@ const styles = {
   nav: {
     display: "flex", justifyContent: "space-between",
     alignItems: "center", padding: "1rem 2rem",
-    background: "#4f46e5", color: "white",
-    position: "sticky", top: 0, zIndex: 100
+    background: "#0a0a0a",
+    borderBottom: "1px solid #222222",
+    position: "sticky", top: 0, zIndex: 100,
+    backdropFilter: "blur(10px)"
   },
-  logo: {
-    color: "white", textDecoration: "none",
-    fontSize: "1.5rem", fontWeight: "bold",
-    letterSpacing: "2px"                    
+  logo: { textDecoration: "none" },
+  logoText: {
+    color: "#ffffff", fontSize: "1.5rem",
+    fontWeight: "700", letterSpacing: "3px",
+    textTransform: "uppercase"
   },
-  links: { display: "flex", alignItems: "center", gap: "1rem" },
-  link: { color: "white", textDecoration: "none", fontSize: "0.95rem" },
-  welcome: { color: "#c7d2fe", fontSize: "0.9rem" },
+  links: { display: "flex", alignItems: "center", gap: "1.5rem" },
+  link: {
+    color: "#a0a0a0", textDecoration: "none",
+    fontSize: "0.9rem", transition: "color 0.2s",
+    letterSpacing: "0.5px"
+  },
+  welcome: { color: "#555555", fontSize: "0.85rem" },
   btn: {
-    background: "white", color: "#4f46e5",
-    border: "none", padding: "8px 16px",
-    borderRadius: "6px", cursor: "pointer",
-    fontWeight: "bold", textDecoration: "none",
-    fontSize: "0.9rem"
+    background: "#7c3aed", color: "#ffffff",
+    border: "none", padding: "8px 20px",
+    borderRadius: "8px", cursor: "pointer",
+    fontWeight: "600", textDecoration: "none",
+    fontSize: "0.9rem", letterSpacing: "0.5px"
   }
 }
