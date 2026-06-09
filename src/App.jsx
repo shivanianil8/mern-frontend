@@ -1,20 +1,33 @@
-import Header from './components/Header'
-import Home from './pages/Home'
-import About from './pages/About'
+import { Routes, Route, Navigate } from "react-router-dom"
+import Home from "./pages/Home"
+import Signup from "./pages/Signup"
+import Login from "./pages/Login"
+import ProfileSetup from "./pages/ProfileSetup"
+import Dashboard from "./pages/Dashboard"
+import AddProduct from "./pages/AddProduct"
+import ProductList from "./pages/ProductList"
+import EditProduct from "./pages/EditProduct"
+import Profile from "./pages/Profile"
 
-import { Routes, Route } from 'react-router-dom'
-
-function App() {
-  return (
-    <>
-      <Header />
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </>
-  )
+function PrivateRoute({ children }) {
+  return localStorage.getItem("token")
+    ? children
+    : <Navigate to="/login" />
 }
 
-export default App
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/"                 element={<Home />} />
+      <Route path="/signup"           element={<Signup />} />
+      <Route path="/login"            element={<Login />} />
+      <Route path="/profile-setup"    element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
+      <Route path="/dashboard"        element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/profile"          element={<PrivateRoute><Profile /></PrivateRoute>} />
+      <Route path="/add-product"      element={<PrivateRoute><AddProduct /></PrivateRoute>} />
+      <Route path="/products"         element={<PrivateRoute><ProductList /></PrivateRoute>} />
+      <Route path="/edit-product/:id" element={<PrivateRoute><EditProduct /></PrivateRoute>} />
+      <Route path="*"                 element={<Navigate to="/" />} />
+    </Routes>
+  )
+}
