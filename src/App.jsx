@@ -8,6 +8,7 @@ import AddProduct from "./pages/AddProduct"
 import ProductList from "./pages/ProductList"
 import EditProduct from "./pages/EditProduct"
 import ProductDetail from "./pages/ProductDetail"
+import Wishlist from "./pages/Wishlist"
 import Profile from "./pages/Profile"
 import BecomeSeller from "./pages/BecomeSeller"
 import SellerDashboard from "./pages/SellerDashboard"
@@ -153,6 +154,14 @@ export default function App() {
         }
       />
 
+<Route
+  path="/wishlist"
+  element={
+    <PrivateRoute>
+      <Wishlist />
+    </PrivateRoute>
+  }
+/>
       <Route
         path="/edit-product/:id"
         element={

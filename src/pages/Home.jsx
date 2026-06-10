@@ -10,10 +10,69 @@ export default function Home() {
   const [search, setSearch]     = useState("")
   const [sortBy, setSortBy]     = useState("newest")
   const [category, setCategory] = useState("All")
+  const [wishlist, setWishlist] = useState([])
   const token    = localStorage.getItem("token")
   const navigate = useNavigate()
 
+  const fetchWishlist = async () => {
+    if (!token) return
+
+    try {
+      const { data } = await axios.get(
+        `${BASE_URL}/api/auth/wishlist`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      setWishlist(data.wishlist.map(item => item._id))
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const toggleWishlist = async (productId, e) => {
+    e.stopPropagation()
+
+    try {
+      const exists = wishlist.includes(productId)
+
+      if (exists) {
+        await axios.delete(
+          `${BASE_URL}/api/auth/wishlist/${productId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+
+        setWishlist(prev =>
+          prev.filter(id => id !== productId)
+        )
+      } else {
+        await axios.post(
+          `${BASE_URL}/api/auth/wishlist/${productId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+
+        setWishlist(prev => [...prev, productId])
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   useEffect(() => {
+    fetchWishlist()
+
     axios.get(`${BASE_URL}/api/products`)
       .then(({ data }) => {
         setProducts(data.products)
@@ -161,6 +220,13 @@ export default function Home() {
                   </div>
                 )}
                 <div style={styles.cardBody}>
+                  <button
+                    style={styles.heartBtn}
+                    onClick={(e) => toggleWishlist(product._id, e)}
+                  >
+                    {wishlist.includes(product._id) ? "❤️" : "🤍"}
+                  </button>
+
                   <h3 style={styles.cardName}>{product.name}</h3>
                   <p style={styles.cardPrice}>₹{product.price}</p>
                   {product.category && (
@@ -283,7 +349,19 @@ const styles = {
     width: "100%", height: "180px", background: "#1a1a1a",
     display: "flex", alignItems: "center", justifyContent: "center"
   },
-  cardBody: { padding: "1.25rem" },
+  cardBody: {
+    padding: "1.25rem",
+    position: "relative"
+  },
+  heartBtn: {
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    background: "transparent",
+    border: "none",
+    fontSize: "1.4rem",
+    cursor: "pointer"
+  },
   cardName: { color: "#ffffff", fontSize: "1rem", fontWeight: "600", marginBottom: "0.5rem" },
   cardPrice: { color: "#7c3aed", fontSize: "1.3rem", fontWeight: "700", marginBottom: "0.25rem" },
   cardCategory: { color: "#a855f7", fontSize: "0.8rem", marginBottom: "0.75rem" },
