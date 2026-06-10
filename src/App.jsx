@@ -14,19 +14,78 @@ import SellerDashboard from "./pages/SellerDashboard"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
 
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user"))
+  } catch {
+    return null
+  }
+}
+
 function PrivateRoute({ children }) {
   return localStorage.getItem("token")
     ? children
-    : <Navigate to="/login" />
+    : <Navigate to="/login" replace />
+}
+
+function PublicRoute({ children }) {
+  return localStorage.getItem("token")
+    ? <Navigate to="/" replace />
+    : children
+}
+
+function SellerRoute({ children }) {
+  const user = getUser()
+
+  if (!localStorage.getItem("token")) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (!user?.isSeller) {
+    return <Navigate to="/become-seller" replace />
+  }
+
+  return children
+}
+
+function BuyerOnlyRoute({ children }) {
+  const user = getUser()
+
+  if (!localStorage.getItem("token")) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (user?.isSeller) {
+    return <Navigate to="/seller-dashboard" replace />
+  }
+
+  return children
 }
 
 export default function App() {
   return (
     <Routes>
+
       <Route path="/" element={<Home />} />
 
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
+      {/* Public only */}
+      <Route
+        path="/signup"
+        element={
+          <PublicRoute>
+            <Signup />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
 
       <Route
         path="/forgot-password"
@@ -38,6 +97,17 @@ export default function App() {
         element={<ResetPassword />}
       />
 
+      {/* Buyer only */}
+      <Route
+        path="/become-seller"
+        element={
+          <BuyerOnlyRoute>
+            <BecomeSeller />
+          </BuyerOnlyRoute>
+        }
+      />
+
+      {/* Protected */}
       <Route
         path="/profile-setup"
         element={
@@ -52,24 +122,6 @@ export default function App() {
         element={
           <PrivateRoute>
             <Dashboard />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/seller-dashboard"
-        element={
-          <PrivateRoute>
-            <SellerDashboard />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/become-seller"
-        element={
-          <PrivateRoute>
-            <BecomeSeller />
           </PrivateRoute>
         }
       />
@@ -110,6 +162,16 @@ export default function App() {
         }
       />
 
+      {/* Seller only */}
+      <Route
+        path="/seller-dashboard"
+        element={
+          <SellerRoute>
+            <SellerDashboard />
+          </SellerRoute>
+        }
+      />
+
       {/* Product Details */}
       <Route
         path="/product/:id"
@@ -118,7 +180,7 @@ export default function App() {
 
       <Route
         path="*"
-        element={<Navigate to="/" />}
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   )

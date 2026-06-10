@@ -23,10 +23,25 @@ export default function Navbar() {
         {token ? (
           <>
             <span style={styles.welcome}>Hi, {user?.name}</span>
-            <Link to="/dashboard"   style={styles.link}>Dashboard</Link>
-            <Link to="/profile"     style={styles.link}>Profile</Link>
-            <Link to="/products"    style={styles.link}>My Products</Link>
+
+            <Link to="/" style={styles.link}>Home</Link>
+
+            <Link to="/products" style={styles.link}>My Products</Link>
+
             <Link to="/add-product" style={styles.link}>Add Product</Link>
+
+            {user?.isSeller ? (
+              <>
+                <Link to="/seller-dashboard" style={styles.link}>Seller Dashboard</Link>
+                <Link to="/profile" style={styles.link}>Seller Profile</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/profile" style={styles.link}>Profile</Link>
+                <Link to="/become-seller" style={styles.link}>Become Seller</Link>
+              </>
+            )}
+
             <button onClick={handleLogout} style={styles.btn}>Logout</button>
           </>
         ) : (
@@ -48,10 +63,35 @@ export default function Navbar() {
           {token ? (
             <>
               <span style={styles.mobileWelcome}>Hi, {user?.name}</span>
-              <Link to="/dashboard"   style={styles.mobileLink} onClick={() => setOpen(false)}>Dashboard</Link>
-              <Link to="/profile"     style={styles.mobileLink} onClick={() => setOpen(false)}>Profile</Link>
-              <Link to="/products"    style={styles.mobileLink} onClick={() => setOpen(false)}>My Products</Link>
-              <Link to="/add-product" style={styles.mobileLink} onClick={() => setOpen(false)}>Add Product</Link>
+
+              <Link to="/products" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                My Products
+              </Link>
+
+              <Link to="/add-product" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                Add Product
+              </Link>
+
+              {user?.isSeller ? (
+                <>
+                  <Link to="/seller-dashboard" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                    Seller Dashboard
+                  </Link>
+                  <Link to="/profile" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                    Seller Profile
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/profile" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                    Profile
+                  </Link>
+                  <Link to="/become-seller" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                    Become Seller
+                  </Link>
+                </>
+              )}
+
               <button onClick={handleLogout} style={styles.mobileBtn}>Logout</button>
             </>
           ) : (
