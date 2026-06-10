@@ -2,9 +2,10 @@ import { useState } from "react"
 import axios from "axios"
 import { useNavigate, Link } from "react-router-dom"
 import BASE_URL from "../api.js"
+import "../App.css"
 
 export default function Signup() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" })
+  const [form, setForm]           = useState({ name: "", email: "", password: "" })
   const [error, setError]         = useState("")
   const [submitted, setSubmitted] = useState(false)
   const navigate = useNavigate()
@@ -28,17 +29,16 @@ export default function Signup() {
     setError("")
     try {
       await axios.post(`${BASE_URL}/api/auth/signup`, form)
-      setSubmitted(true)  // ← show check email screen
+      setSubmitted(true)
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed")
     }
   }
 
-  // Check your email screen
   if (submitted) {
     return (
-      <div style={styles.page}>
-        <div style={styles.left}>
+      <div className="auth-page">
+        <div className="auth-left">
           <div style={styles.leftContent}>
             <h1 style={styles.brand}>Vyorra</h1>
             <p style={styles.tagline}>Shop beyond ordinary</p>
@@ -46,7 +46,7 @@ export default function Signup() {
             <div style={styles.circle2} />
           </div>
         </div>
-        <div style={styles.right}>
+        <div className="auth-right">
           <div style={styles.card}>
             <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📧</div>
             <h2 style={styles.title}>Check your email</h2>
@@ -68,8 +68,8 @@ export default function Signup() {
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.left}>
+    <div className="auth-page">
+      <div className="auth-left">
         <div style={styles.leftContent}>
           <h1 style={styles.brand}>Vyorra</h1>
           <p style={styles.tagline}>Join the marketplace</p>
@@ -78,7 +78,7 @@ export default function Signup() {
         </div>
       </div>
 
-      <div style={styles.right}>
+      <div className="auth-right">
         <div style={styles.card}>
           <h2 style={styles.title}>Create account</h2>
           <p style={styles.subtitle}>Start buying and selling today</p>
@@ -117,23 +117,12 @@ export default function Signup() {
 }
 
 const styles = {
-  page: { display: "flex", minHeight: "100vh", background: "#0a0a0a" },
-  left: {
-    flex: 1, display: "flex", alignItems: "center",
-    justifyContent: "center", position: "relative",
-    overflow: "hidden", padding: "2rem",
-    background: "#0d0d0d", borderRight: "1px solid #1a1a1a"
-  },
   leftContent: { position: "relative", zIndex: 2, textAlign: "center" },
   brand: {
-    color: "#ffffff", fontSize: "4rem",
-    fontWeight: "800", letterSpacing: "6px",
-    textTransform: "uppercase", marginBottom: "1rem"
+    color: "#ffffff", fontSize: "4rem", fontWeight: "800",
+    letterSpacing: "6px", textTransform: "uppercase", marginBottom: "1rem"
   },
-  tagline: {
-    color: "#555555", fontSize: "1rem",
-    letterSpacing: "3px", textTransform: "uppercase"
-  },
+  tagline: { color: "#555555", fontSize: "1rem", letterSpacing: "3px", textTransform: "uppercase" },
   circle1: {
     position: "absolute", width: "400px", height: "400px",
     borderRadius: "50%", top: "-100px", right: "-100px",
@@ -144,20 +133,10 @@ const styles = {
     borderRadius: "50%", bottom: "-100px", left: "-50px",
     background: "radial-gradient(circle, #a855f715, transparent)"
   },
-  right: {
-    flex: 1, display: "flex", alignItems: "center",
-    justifyContent: "center", padding: "2rem"
-  },
   card: { width: "100%", maxWidth: "400px" },
-  title: {
-    color: "#ffffff", fontSize: "2rem",
-    fontWeight: "700", marginBottom: "0.5rem"
-  },
+  title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.5rem" },
   subtitle: { color: "#555555", marginBottom: "2rem", fontSize: "0.95rem" },
-  label: {
-    display: "block", color: "#a0a0a0",
-    fontSize: "0.85rem", marginBottom: "8px", letterSpacing: "0.5px"
-  },
+  label: { display: "block", color: "#a0a0a0", fontSize: "0.85rem", marginBottom: "8px", letterSpacing: "0.5px" },
   input: {
     width: "100%", padding: "12px 16px", margin: "0 0 20px 0",
     borderRadius: "10px", border: "1px solid #222222",

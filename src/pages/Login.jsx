@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { useNavigate, Link, useSearchParams } from "react-router-dom"
 import BASE_URL from "../api.js"
+import "../App.css"
 
 export default function Login() {
   const [form, setForm]       = useState({ email: "", password: "" })
@@ -41,8 +42,8 @@ export default function Login() {
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.left}>
+    <div className="auth-page">
+      <div className="auth-left">
         <div style={styles.leftContent}>
           <h1 style={styles.brand}>Vyorra</h1>
           <p style={styles.tagline}>Shop beyond ordinary</p>
@@ -51,7 +52,7 @@ export default function Login() {
         </div>
       </div>
 
-      <div style={styles.right}>
+      <div className="auth-right">
         <div style={styles.card}>
           <h2 style={styles.title}>Welcome back</h2>
           <p style={styles.subtitle}>Sign in to your account</p>
@@ -67,9 +68,7 @@ export default function Login() {
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <label style={styles.label}>Password</label>
-              <Link to="/forgot-password" style={styles.forgotLink}>
-                Forgot password?
-              </Link>
+              <Link to="/forgot-password" style={styles.forgotLink}>Forgot password?</Link>
             </div>
             <input style={styles.input} name="password" type="password"
               placeholder="Enter your password"
@@ -90,13 +89,6 @@ export default function Login() {
 }
 
 const styles = {
-  page: { display: "flex", minHeight: "100vh", background: "#0a0a0a" },
-  left: {
-    flex: 1, display: "flex", alignItems: "center",
-    justifyContent: "center", position: "relative",
-    overflow: "hidden", padding: "2rem",
-    background: "#0d0d0d", borderRight: "1px solid #1a1a1a"
-  },
   leftContent: { position: "relative", zIndex: 2, textAlign: "center" },
   brand: {
     color: "#ffffff", fontSize: "4rem", fontWeight: "800",
@@ -112,10 +104,6 @@ const styles = {
     position: "absolute", width: "300px", height: "300px",
     borderRadius: "50%", bottom: "-100px", left: "-50px",
     background: "radial-gradient(circle, #a855f715, transparent)"
-  },
-  right: {
-    flex: 1, display: "flex", alignItems: "center",
-    justifyContent: "center", padding: "2rem"
   },
   card: { width: "100%", maxWidth: "400px" },
   title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.5rem" },
