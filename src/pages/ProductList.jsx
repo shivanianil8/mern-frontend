@@ -8,14 +8,21 @@ export default function ProductList() {
   const [products, setProducts] = useState([])
   const [deleteId, setDeleteId] = useState(null)
   const navigate = useNavigate()
-  const token = localStorage.getItem("token")
+  const token  = localStorage.getItem("token")
+  const user   = JSON.parse(localStorage.getItem("user"))
+  const userId = user?.id
 
   useEffect(() => { fetchProducts() }, [])
 
   const fetchProducts = async () => {
     try {
       const { data } = await axios.get(`${BASE_URL}/api/products`)
-      setProducts(data.products)
+      const myProducts = data.products.filter(
+        product =>
+          product.addedBy?._id === userId ||
+          product.addedBy === userId
+      )
+      setProducts(myProducts)
     } catch (err) { console.log(err) }
   }
 
@@ -55,22 +62,27 @@ export default function ProductList() {
             {products.map(product => (
               <div key={product._id} style={styles.item}>
 
-                {/* Image or emoji */}
                 {product.image ? (
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    style={styles.itemImage}
-                  />
+                  <img src={product.image} alt={product.name} style={styles.itemImage} />
                 ) : (
                   <div style={styles.itemIcon}>🛍️</div>
                 )}
 
                 <div style={styles.itemInfo}>
                   <h3 style={styles.itemName}>{product.name}</h3>
-                  <p style={styles.itemSeller}>by {product.addedBy?.name}</p>
+                  {product.category && (
+                    <p style={styles.itemCategory}>{product.category}</p>
+                  )}
+                  {product.description && (
+                    <p style={styles.itemDesc}>
+                      {product.description.slice(0, 60)}
+                      {product.description.length > 60 ? "..." : ""}
+                    </p>
+                  )}
                 </div>
+
                 <p style={styles.itemPrice}>₹{product.price}</p>
+
                 <div style={styles.itemActions}>
                   <button style={styles.editBtn}
                     onClick={() => navigate(`/edit-product/${product._id}`, { state: product })}>
@@ -123,14 +135,14 @@ const styles = {
     alignItems: "center", gap: "1rem"
   },
   itemImage: {
-    width: "60px", height: "60px",
-    borderRadius: "10px", objectFit: "cover",
-    border: "1px solid #222222", flexShrink: 0
+    width: "60px", height: "60px", borderRadius: "10px",
+    objectFit: "cover", border: "1px solid #222222", flexShrink: 0
   },
   itemIcon: { fontSize: "1.5rem", flexShrink: 0 },
   itemInfo: { flex: 1 },
   itemName: { color: "#ffffff", fontWeight: "600", marginBottom: "0.25rem", fontSize: "0.95rem" },
-  itemSeller: { color: "#555555", fontSize: "0.8rem" },
+  itemCategory: { color: "#7c3aed", fontSize: "0.8rem", marginBottom: "0.25rem" },
+  itemDesc: { color: "#555555", fontSize: "0.8rem" },
   itemPrice: { color: "#7c3aed", fontWeight: "700", fontSize: "1.1rem" },
   itemActions: { display: "flex", gap: "0.5rem" },
   editBtn: {

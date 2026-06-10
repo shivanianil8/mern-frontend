@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import Navbar from "../components/Navbar"
 import BASE_URL from "../api.js"
 
 export default function Home() {
-  const [products, setProducts]   = useState([])
-  const [filtered, setFiltered]   = useState([])
-  const [search, setSearch]       = useState("")
-  const [sortBy, setSortBy]       = useState("newest")
-  const token = localStorage.getItem("token")
+  const [products, setProducts] = useState([])
+  const [filtered, setFiltered] = useState([])
+  const [search, setSearch]     = useState("")
+  const [sortBy, setSortBy]     = useState("newest")
+  const [category, setCategory] = useState("All")
+  const token    = localStorage.getItem("token")
+  const navigate = useNavigate()
 
   useEffect(() => {
     axios.get(`${BASE_URL}/api/products`)
@@ -23,14 +25,16 @@ export default function Home() {
   useEffect(() => {
     let result = [...products]
 
-    // Search filter
     if (search.trim()) {
       result = result.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase())
       )
     }
 
-    // Sort
+    if (category !== "All") {
+      result = result.filter(p => p.category === category)
+    }
+
     if (sortBy === "newest") {
       result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     } else if (sortBy === "price-low") {
@@ -40,7 +44,7 @@ export default function Home() {
     }
 
     setFiltered(result)
-  }, [search, sortBy, products])
+  }, [search, sortBy, category, products])
 
   return (
     <div style={{ background: "#0a0a0a", minHeight: "100vh" }}>
@@ -83,7 +87,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Search and Sort */}
+        {/* Search, Sort and Category */}
         <div style={styles.controls}>
           <div style={styles.searchWrap}>
             <span style={styles.searchIcon}>🔍</span>
@@ -97,6 +101,22 @@ export default function Home() {
               <button style={styles.clearBtn} onClick={() => setSearch("")}>✕</button>
             )}
           </div>
+
+          <select
+            style={styles.sort}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="All">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Food">Food</option>
+            <option value="Books">Books</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Sports">Sports</option>
+            <option value="Beauty">Beauty</option>
+            <option value="Other">Other</option>
+          </select>
 
           <select
             style={styles.sort}
@@ -124,7 +144,11 @@ export default function Home() {
         ) : (
           <div style={styles.grid}>
             {filtered.map(product => (
-              <div key={product._id} style={styles.card}>
+              <div
+                key={product._id}
+                style={styles.card}
+                onClick={() => navigate(`/product/${product._id}`)}
+              >
                 {product.image ? (
                   <img
                     src={product.image}
@@ -139,6 +163,9 @@ export default function Home() {
                 <div style={styles.cardBody}>
                   <h3 style={styles.cardName}>{product.name}</h3>
                   <p style={styles.cardPrice}>₹{product.price}</p>
+                  {product.category && (
+                    <p style={styles.cardCategory}>{product.category}</p>
+                  )}
                   <div style={styles.cardFooter}>
                     <span style={styles.cardSeller}>
                       by {product.addedBy?.name || "Unknown"}
@@ -213,9 +240,7 @@ const styles = {
   },
   sectionTitle: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.25rem" },
   sectionSub: { color: "#555555", fontSize: "0.9rem" },
-  controls: {
-    display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap"
-  },
+  controls: { display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" },
   searchWrap: {
     flex: 1, display: "flex", alignItems: "center",
     background: "#111111", borderRadius: "10px",
@@ -260,7 +285,8 @@ const styles = {
   },
   cardBody: { padding: "1.25rem" },
   cardName: { color: "#ffffff", fontSize: "1rem", fontWeight: "600", marginBottom: "0.5rem" },
-  cardPrice: { color: "#7c3aed", fontSize: "1.3rem", fontWeight: "700", marginBottom: "0.75rem" },
+  cardPrice: { color: "#7c3aed", fontSize: "1.3rem", fontWeight: "700", marginBottom: "0.25rem" },
+  cardCategory: { color: "#a855f7", fontSize: "0.8rem", marginBottom: "0.75rem" },
   cardFooter: { borderTop: "1px solid #1a1a1a", paddingTop: "0.75rem" },
   cardSeller: { color: "#555555", fontSize: "0.8rem" }
 }

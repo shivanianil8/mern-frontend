@@ -5,73 +5,190 @@ import Navbar from "../components/Navbar"
 import BASE_URL from "../api.js"
 
 export default function EditProduct() {
-  const navigate  = useNavigate()
-  const location  = useLocation()
-  const product   = location.state
+  const navigate = useNavigate()
+  const location = useLocation()
+  const product = location.state
 
-  const [form, setForm]     = useState({ name: product?.name || "", price: product?.price || "" })
-  const [error, setError]   = useState("")
+  const [form, setForm] = useState({
+    name: product?.name || "",
+    price: product?.price || "",
+    description: product?.description || "",
+    category: product?.category || "Other"
+  })
+
+  const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
   const handleChange = (e) => {
     const { name, value } = e.target
+
     if (name === "price") {
       const n = value.replace(/[^0-9]/g, "")
-      if (n.length <= 7) setForm({ ...form, price: n })
+      if (n.length <= 7) {
+        setForm({ ...form, price: n })
+      }
       return
     }
+
     if (name === "name" && value.length > 100) return
-    setForm({ ...form, [name]: value })
+
+    setForm({
+      ...form,
+      [name]: value
+    })
   }
 
   const validate = () => {
-    if (form.name.trim().length < 2) return "Product name must be at least 2 characters"
-    if (!form.price || Number(form.price) <= 0) return "Price must be greater than 0"
+    if (form.name.trim().length < 2)
+      return "Product name must be at least 2 characters"
+
+    if (!form.price || Number(form.price) <= 0)
+      return "Price must be greater than 0"
+
+    if (form.description.trim().length < 10)
+      return "Description must be at least 10 characters"
+
     return null
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
     const err = validate()
-    if (err) { setError(err); return }
+
+    if (err) {
+      setError(err)
+      return
+    }
+
     setError("")
+
     const token = localStorage.getItem("token")
+
     try {
-      await axios.put(`${BASE_URL}/api/products/${product._id}`, form,
-        { headers: { Authorization: `Bearer ${token}` } })
+      await axios.put(
+        `${BASE_URL}/api/products/${product._id}`,
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
       setSuccess("Product updated!")
       setTimeout(() => navigate("/products"), 1500)
-    } catch (err) { setError(err.response?.data?.message || "Failed") }
+
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Failed"
+      )
+    }
   }
 
   return (
     <div style={{ background: "#0a0a0a", minHeight: "100vh" }}>
       <Navbar />
+
       <div style={styles.container}>
         <div style={styles.header}>
           <h2 style={styles.title}>Edit Product</h2>
-          <p style={styles.subtitle}>Update your product details</p>
+          <p style={styles.subtitle}>
+            Update your product details
+          </p>
         </div>
 
         <div style={styles.card}>
-          {error   && <p style={styles.error}>{error}</p>}
+          {error && <p style={styles.error}>{error}</p>}
           {success && <p style={styles.success}>{success}</p>}
 
           <form onSubmit={handleSubmit}>
-            <label style={styles.label}>Product Name</label>
-            <input style={styles.input} name="name"
-              value={form.name} onChange={handleChange}
-              maxLength={100} required />
-            <small style={styles.hint}>{form.name.length}/100</small>
 
-            <label style={styles.label}>Price (₹)</label>
-            <input style={styles.input} name="price"
-              value={form.price} onChange={handleChange}
-              inputMode="numeric" required />
+            <label style={styles.label}>
+              Product Name
+            </label>
 
-            <button style={styles.button} type="submit">Save Changes</button>
-            <button style={styles.cancel} type="button"
-              onClick={() => navigate("/products")}>Cancel</button>
+            <input
+              style={styles.input}
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              maxLength={100}
+              required
+            />
+
+            <small style={styles.hint}>
+              {form.name.length}/100
+            </small>
+
+            <label style={styles.label}>
+              Price (₹)
+            </label>
+
+            <input
+              style={styles.input}
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              inputMode="numeric"
+              required
+            />
+
+            <label style={styles.label}>
+              Category
+            </label>
+
+            <select
+              style={styles.input}
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+            >
+              <option value="Electronics">Electronics</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Food">Food</option>
+              <option value="Books">Books</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Sports">Sports</option>
+              <option value="Beauty">Beauty</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <label style={styles.label}>
+              Description
+            </label>
+
+            <textarea
+              style={{
+                ...styles.input,
+                minHeight: "120px",
+                resize: "vertical"
+              }}
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              required
+            />
+
+            <small style={styles.hint}>
+              {form.description.length} characters
+            </small>
+
+            <button
+              style={styles.button}
+              type="submit"
+            >
+              Save Changes
+            </button>
+
+            <button
+              style={styles.cancel}
+              type="button"
+              onClick={() => navigate("/products")}
+            >
+              Cancel
+            </button>
+
           </form>
         </div>
       </div>
@@ -80,29 +197,100 @@ export default function EditProduct() {
 }
 
 const styles = {
-  container: { maxWidth: "500px", margin: "0 auto", padding: "4rem 2rem" },
-  header: { marginBottom: "2rem" },
-  title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.5rem" },
-  subtitle: { color: "#555555", fontSize: "0.9rem" },
-  card: { background: "#111111", borderRadius: "16px", padding: "2rem", border: "1px solid #222222" },
-  label: { display: "block", color: "#a0a0a0", fontSize: "0.85rem", marginBottom: "8px" },
+  container: {
+    maxWidth: "500px",
+    margin: "0 auto",
+    padding: "4rem 2rem"
+  },
+
+  header: {
+    marginBottom: "2rem"
+  },
+
+  title: {
+    color: "#ffffff",
+    fontSize: "2rem",
+    fontWeight: "700",
+    marginBottom: "0.5rem"
+  },
+
+  subtitle: {
+    color: "#555555",
+    fontSize: "0.9rem"
+  },
+
+  card: {
+    background: "#111111",
+    borderRadius: "16px",
+    padding: "2rem",
+    border: "1px solid #222222"
+  },
+
+  label: {
+    display: "block",
+    color: "#a0a0a0",
+    fontSize: "0.85rem",
+    marginBottom: "8px"
+  },
+
   input: {
-    width: "100%", padding: "12px 16px", margin: "0 0 4px 0",
-    borderRadius: "10px", border: "1px solid #222222",
-    background: "#0a0a0a", color: "#ffffff", fontSize: "1rem",
-    boxSizing: "border-box", outline: "none"
+    width: "100%",
+    padding: "12px 16px",
+    margin: "0 0 12px 0",
+    borderRadius: "10px",
+    border: "1px solid #222222",
+    background: "#0a0a0a",
+    color: "#ffffff",
+    fontSize: "1rem",
+    boxSizing: "border-box",
+    outline: "none"
   },
-  hint: { color: "#333333", fontSize: "0.75rem", display: "block", marginBottom: "20px" },
+
+  hint: {
+    color: "#333333",
+    fontSize: "0.75rem",
+    display: "block",
+    marginBottom: "20px"
+  },
+
   button: {
-    width: "100%", padding: "14px", background: "#7c3aed",
-    color: "#ffffff", border: "none", borderRadius: "10px",
-    cursor: "pointer", fontWeight: "600", marginTop: "1rem"
+    width: "100%",
+    padding: "14px",
+    background: "#7c3aed",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "600",
+    marginTop: "1rem"
   },
+
   cancel: {
-    width: "100%", padding: "14px", background: "transparent",
-    color: "#555555", border: "1px solid #222222", borderRadius: "10px",
-    cursor: "pointer", marginTop: "8px"
+    width: "100%",
+    padding: "14px",
+    background: "transparent",
+    color: "#555555",
+    border: "1px solid #222222",
+    borderRadius: "10px",
+    cursor: "pointer",
+    marginTop: "8px"
   },
-  error: { color: "#ef4444", fontSize: "0.85rem", marginBottom: "1rem", padding: "10px", background: "#ef444410", borderRadius: "8px" },
-  success: { color: "#22c55e", fontSize: "0.85rem", marginBottom: "1rem", padding: "10px", background: "#22c55e10", borderRadius: "8px" }
+
+  error: {
+    color: "#ef4444",
+    fontSize: "0.85rem",
+    marginBottom: "1rem",
+    padding: "10px",
+    background: "#ef444410",
+    borderRadius: "8px"
+  },
+
+  success: {
+    color: "#22c55e",
+    fontSize: "0.85rem",
+    marginBottom: "1rem",
+    padding: "10px",
+    background: "#22c55e10",
+    borderRadius: "8px"
+  }
 }
