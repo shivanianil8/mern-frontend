@@ -5,7 +5,8 @@ import BASE_URL from "../api.js"
 
 export default function Signup() {
   const [form, setForm] = useState({ name: "", email: "", password: "" })
-  const [error, setError] = useState("")
+  const [error, setError]         = useState("")
+  const [submitted, setSubmitted] = useState(false)
   const navigate = useNavigate()
 
   const handleChange = (e) =>
@@ -26,13 +27,44 @@ export default function Signup() {
     if (validationError) { setError(validationError); return }
     setError("")
     try {
-      const { data } = await axios.post(`${BASE_URL}/api/auth/signup`, form)
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      navigate("/dashboard")
+      await axios.post(`${BASE_URL}/api/auth/signup`, form)
+      setSubmitted(true)  // ← show check email screen
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed")
     }
+  }
+
+  // Check your email screen
+  if (submitted) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.left}>
+          <div style={styles.leftContent}>
+            <h1 style={styles.brand}>Vyorra</h1>
+            <p style={styles.tagline}>Shop beyond ordinary</p>
+            <div style={styles.circle1} />
+            <div style={styles.circle2} />
+          </div>
+        </div>
+        <div style={styles.right}>
+          <div style={styles.card}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📧</div>
+            <h2 style={styles.title}>Check your email</h2>
+            <p style={{ color: "#a0a0a0", marginBottom: "1rem", lineHeight: 1.7 }}>
+              We sent a verification link to{" "}
+              <strong style={{ color: "#ffffff" }}>{form.email}</strong>.
+              Click the link to activate your account.
+            </p>
+            <p style={{ color: "#555555", fontSize: "0.85rem", marginBottom: "2rem" }}>
+              Didn't receive it? Check your spam folder.
+            </p>
+            <button style={styles.button} onClick={() => navigate("/login")}>
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
