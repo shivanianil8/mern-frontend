@@ -5,14 +5,42 @@ import Navbar from "../components/Navbar"
 import BASE_URL from "../api.js"
 
 export default function Home() {
-  const [products, setProducts] = useState([])
+  const [products, setProducts]   = useState([])
+  const [filtered, setFiltered]   = useState([])
+  const [search, setSearch]       = useState("")
+  const [sortBy, setSortBy]       = useState("newest")
   const token = localStorage.getItem("token")
 
   useEffect(() => {
     axios.get(`${BASE_URL}/api/products`)
-      .then(({ data }) => setProducts(data.products))
+      .then(({ data }) => {
+        setProducts(data.products)
+        setFiltered(data.products)
+      })
       .catch(err => console.log(err))
   }, [])
+
+  useEffect(() => {
+    let result = [...products]
+
+    // Search filter
+    if (search.trim()) {
+      result = result.filter(p =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+      )
+    }
+
+    // Sort
+    if (sortBy === "newest") {
+      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    } else if (sortBy === "price-low") {
+      result.sort((a, b) => a.price - b.price)
+    } else if (sortBy === "price-high") {
+      result.sort((a, b) => b.price - a.price)
+    }
+
+    setFiltered(result)
+  }, [search, sortBy, products])
 
   return (
     <div style={{ background: "#0a0a0a", minHeight: "100vh" }}>
@@ -42,7 +70,6 @@ export default function Home() {
             </div>
           )}
         </div>
-
         <div style={styles.circle1} />
         <div style={styles.circle2} />
       </div>
@@ -50,21 +77,54 @@ export default function Home() {
       {/* Products */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle}>All Products</h2>
-          <p style={styles.sectionSub}>Explore what sellers have listed</p>
+          <div>
+            <h2 style={styles.sectionTitle}>All Products</h2>
+            <p style={styles.sectionSub}>{filtered.length} products found</p>
+          </div>
         </div>
 
-        {products.length === 0 ? (
+        {/* Search and Sort */}
+        <div style={styles.controls}>
+          <div style={styles.searchWrap}>
+            <span style={styles.searchIcon}>🔍</span>
+            <input
+              style={styles.searchInput}
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button style={styles.clearBtn} onClick={() => setSearch("")}>✕</button>
+            )}
+          </div>
+
+          <select
+            style={styles.sort}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="newest">Newest First</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+          </select>
+        </div>
+
+        {filtered.length === 0 ? (
           <div style={styles.empty}>
-            <p style={{ fontSize: "3rem" }}>🛍️</p>
-            <p style={{ color: "#555" }}>No products yet. Be the first to add one!</p>
+            <p style={{ fontSize: "3rem" }}>🔍</p>
+            <p style={{ color: "#555" }}>
+              {search ? `No products found for "${search}"` : "No products yet. Be the first to add one!"}
+            </p>
+            {search && (
+              <button style={styles.clearSearch} onClick={() => setSearch("")}>
+                Clear Search
+              </button>
+            )}
           </div>
         ) : (
           <div style={styles.grid}>
-            {products.map(product => (
+            {filtered.map(product => (
               <div key={product._id} style={styles.card}>
-
-                {/* Image or placeholder */}
                 {product.image ? (
                   <img
                     src={product.image}
@@ -76,7 +136,6 @@ export default function Home() {
                     <span style={{ fontSize: "3rem" }}>🛍️</span>
                   </div>
                 )}
-
                 <div style={styles.cardBody}>
                   <h3 style={styles.cardName}>{product.name}</h3>
                   <p style={styles.cardPrice}>₹{product.price}</p>
@@ -119,8 +178,7 @@ const styles = {
   },
   heroText: {
     color: "#a0a0a0", fontSize: "1.1rem",
-    maxWidth: "500px", margin: "0 auto 2.5rem",
-    lineHeight: 1.7
+    maxWidth: "500px", margin: "0 auto 2.5rem", lineHeight: 1.7
   },
   heroBtns: {
     display: "flex", gap: "1rem",
@@ -141,26 +199,50 @@ const styles = {
   circle1: {
     position: "absolute", width: "500px", height: "500px",
     borderRadius: "50%", top: "-200px", right: "-100px",
-    background: "radial-gradient(circle, #7c3aed15, transparent)",
-    zIndex: 1
+    background: "radial-gradient(circle, #7c3aed15, transparent)", zIndex: 1
   },
   circle2: {
     position: "absolute", width: "400px", height: "400px",
     borderRadius: "50%", bottom: "-150px", left: "-100px",
-    background: "radial-gradient(circle, #a855f715, transparent)",
-    zIndex: 1
+    background: "radial-gradient(circle, #a855f715, transparent)", zIndex: 1
   },
-  section: {
-    maxWidth: "1200px", margin: "0 auto",
-    padding: "5rem 2rem"
+  section: { maxWidth: "1200px", margin: "0 auto", padding: "5rem 2rem" },
+  sectionHeader: {
+    display: "flex", justifyContent: "space-between",
+    alignItems: "center", marginBottom: "2rem"
   },
-  sectionHeader: { textAlign: "center", marginBottom: "3rem" },
-  sectionTitle: {
-    color: "#ffffff", fontSize: "2rem",
-    fontWeight: "700", marginBottom: "0.5rem"
+  sectionTitle: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.25rem" },
+  sectionSub: { color: "#555555", fontSize: "0.9rem" },
+  controls: {
+    display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap"
   },
-  sectionSub: { color: "#555555", fontSize: "0.95rem" },
+  searchWrap: {
+    flex: 1, display: "flex", alignItems: "center",
+    background: "#111111", borderRadius: "10px",
+    border: "1px solid #222222", padding: "0 1rem",
+    minWidth: "200px"
+  },
+  searchIcon: { fontSize: "1rem", marginRight: "0.5rem" },
+  searchInput: {
+    flex: 1, background: "transparent", border: "none",
+    color: "#ffffff", fontSize: "1rem", padding: "12px 0",
+    outline: "none"
+  },
+  clearBtn: {
+    background: "transparent", border: "none",
+    color: "#555555", cursor: "pointer", fontSize: "1rem"
+  },
+  sort: {
+    background: "#111111", border: "1px solid #222222",
+    color: "#ffffff", padding: "12px 16px", borderRadius: "10px",
+    fontSize: "0.9rem", cursor: "pointer", outline: "none"
+  },
   empty: { textAlign: "center", padding: "4rem" },
+  clearSearch: {
+    background: "#7c3aed", color: "#ffffff", border: "none",
+    padding: "10px 20px", borderRadius: "8px", cursor: "pointer",
+    marginTop: "1rem", fontSize: "0.9rem"
+  },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
@@ -168,31 +250,17 @@ const styles = {
   },
   card: {
     background: "#111111", borderRadius: "16px",
-    border: "1px solid #222222",
-    overflow: "hidden", cursor: "pointer",
-    transition: "border-color 0.2s, transform 0.2s"
+    border: "1px solid #222222", overflow: "hidden",
+    cursor: "pointer", transition: "border-color 0.2s, transform 0.2s"
   },
-  cardImage: {
-    width: "100%", height: "180px",
-    objectFit: "cover"
-  },
+  cardImage: { width: "100%", height: "180px", objectFit: "cover" },
   cardImagePlaceholder: {
-    width: "100%", height: "180px",
-    background: "#1a1a1a",
-    display: "flex", alignItems: "center",
-    justifyContent: "center"
+    width: "100%", height: "180px", background: "#1a1a1a",
+    display: "flex", alignItems: "center", justifyContent: "center"
   },
   cardBody: { padding: "1.25rem" },
-  cardName: {
-    color: "#ffffff", fontSize: "1rem",
-    fontWeight: "600", marginBottom: "0.5rem"
-  },
-  cardPrice: {
-    color: "#7c3aed", fontSize: "1.3rem",
-    fontWeight: "700", marginBottom: "0.75rem"
-  },
-  cardFooter: {
-    borderTop: "1px solid #1a1a1a", paddingTop: "0.75rem"
-  },
+  cardName: { color: "#ffffff", fontSize: "1rem", fontWeight: "600", marginBottom: "0.5rem" },
+  cardPrice: { color: "#7c3aed", fontSize: "1.3rem", fontWeight: "700", marginBottom: "0.75rem" },
+  cardFooter: { borderTop: "1px solid #1a1a1a", paddingTop: "0.75rem" },
   cardSeller: { color: "#555555", fontSize: "0.8rem" }
 }
