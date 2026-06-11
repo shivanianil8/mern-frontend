@@ -10,7 +10,7 @@ export default function ProductList() {
   const navigate = useNavigate()
   const token  = localStorage.getItem("token")
   const user   = JSON.parse(localStorage.getItem("user"))
-  const userId = user?.id
+  const userId = user?.id || user?._id
 
   useEffect(() => { fetchProducts() }, [])
 
