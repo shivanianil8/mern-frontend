@@ -45,23 +45,25 @@ export default function Navbar() {
 
             <Link to="/dashboard" style={styles.link}>Dashboard</Link>
 
-            <Link to="/products" style={styles.link}>My Products</Link>
+            {user?.activeMode === 'seller' && (
+              <Link to="/products" style={styles.link}>My Products</Link>
+            )}
 
             <Link to="/wishlist" style={styles.link}>❤️ Wishlist</Link>
 
             <Link to="/swap-requests" style={styles.link}>🔄 Swaps</Link>
 
-            <Link to="/add-product" style={styles.link}>Add Product</Link>
+            {user?.activeMode === 'seller' && (
+              <Link to="/add-product" style={styles.link}>Add Product</Link>
+            )}
 
             {user?.activeMode === 'seller' ? (
               <>
                 <Link to="/seller-dashboard" style={styles.link}>Seller Dashboard</Link>
                 <Link to="/profile" style={styles.link}>Profile</Link>
-                {user?.isSeller && (
-                  <button onClick={switchMode} style={styles.switchBtn}>
-                    👤 Buyer Mode
-                  </button>
-                )}
+                <button onClick={switchMode} style={styles.switchBtn}>
+                  👤 Buyer Mode
+                </button>
               </>
             ) : (
               <>
@@ -102,9 +104,11 @@ export default function Navbar() {
                 Dashboard
               </Link>
 
-              <Link to="/products" style={styles.mobileLink} onClick={() => setOpen(false)}>
-                My Products
-              </Link>
+              {user?.activeMode === 'seller' && (
+                <Link to="/products" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                  My Products
+                </Link>
+              )}
 
               <Link to="/wishlist" style={styles.mobileLink} onClick={() => setOpen(false)}>
                 ❤️ Wishlist
@@ -114,9 +118,11 @@ export default function Navbar() {
                 🔄 Swaps
               </Link>
 
-              <Link to="/add-product" style={styles.mobileLink} onClick={() => setOpen(false)}>
-                Add Product
-              </Link>
+              {user?.activeMode === 'seller' && (
+                <Link to="/add-product" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                  Add Product
+                </Link>
+              )}
 
               {user?.activeMode === 'seller' ? (
                 <>
@@ -126,11 +132,9 @@ export default function Navbar() {
                   <Link to="/profile" style={styles.mobileLink} onClick={() => setOpen(false)}>
                     Profile
                   </Link>
-                  {user?.isSeller && (
-                    <button onClick={switchMode} style={styles.mobileSwitchBtn}>
-                      👤 Switch to Buyer Mode
-                    </button>
-                  )}
+                  <button onClick={switchMode} style={styles.mobileSwitchBtn}>
+                    👤 Switch to Buyer Mode
+                  </button>
                 </>
               ) : (
                 <>
