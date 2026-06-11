@@ -12,21 +12,16 @@ export default function Home() {
   const [category, setCategory] = useState("All")
   const [wishlist, setWishlist] = useState([])
   const token    = localStorage.getItem("token")
+  const user     = JSON.parse(localStorage.getItem("user"))
   const navigate = useNavigate()
 
   const fetchWishlist = async () => {
     if (!token) return
-
     try {
       const { data } = await axios.get(
         `${BASE_URL}/api/auth/wishlist`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
-
       setWishlist(data.wishlist.map(item => item._id))
     } catch (err) {
       console.log(err)
@@ -35,34 +30,21 @@ export default function Home() {
 
   const toggleWishlist = async (productId, e) => {
     e.stopPropagation()
-
+    if (!token) { navigate("/login"); return }
     try {
       const exists = wishlist.includes(productId)
-
       if (exists) {
         await axios.delete(
           `${BASE_URL}/api/auth/wishlist/${productId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         )
-
-        setWishlist(prev =>
-          prev.filter(id => id !== productId)
-        )
+        setWishlist(prev => prev.filter(id => id !== productId))
       } else {
         await axios.post(
           `${BASE_URL}/api/auth/wishlist/${productId}`,
           {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         )
-
         setWishlist(prev => [...prev, productId])
       }
     } catch (err) {
@@ -72,7 +54,6 @@ export default function Home() {
 
   useEffect(() => {
     fetchWishlist()
-
     axios.get(`${BASE_URL}/api/products`)
       .then(({ data }) => {
         setProducts(data.products)
@@ -128,8 +109,8 @@ export default function Home() {
             </div>
           ) : (
             <div style={styles.heroBtns}>
-              <Link to="/add-product" style={styles.heroBtn}>Add Product</Link>
-              <Link to="/products"    style={styles.heroBtnOutline}>My Products</Link>
+              <Link to="/dashboard" style={styles.heroBtn}>Go to Dashboard</Link>
+              <Link to="/wishlist"  style={styles.heroBtnOutline}>My Wishlist</Link>
             </div>
           )}
         </div>
@@ -209,24 +190,21 @@ export default function Home() {
                 onClick={() => navigate(`/product/${product._id}`)}
               >
                 {product.image ? (
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    style={styles.cardImage}
-                  />
+                  <img src={product.image} alt={product.name} style={styles.cardImage} />
                 ) : (
                   <div style={styles.cardImagePlaceholder}>
                     <span style={{ fontSize: "3rem" }}>🛍️</span>
                   </div>
                 )}
                 <div style={styles.cardBody}>
-                  <button
-                    style={styles.heartBtn}
-                    onClick={(e) => toggleWishlist(product._id, e)}
-                  >
-                    {wishlist.includes(product._id) ? "❤️" : "🤍"}
-                  </button>
-
+                  {token && (
+                    <button
+                      style={styles.heartBtn}
+                      onClick={(e) => toggleWishlist(product._id, e)}
+                    >
+                      {wishlist.includes(product._id) ? "❤️" : "🤍"}
+                    </button>
+                  )}
                   <h3 style={styles.cardName}>{product.name}</h3>
                   <p style={styles.cardPrice}>₹{product.price}</p>
                   {product.category && (
@@ -349,18 +327,11 @@ const styles = {
     width: "100%", height: "180px", background: "#1a1a1a",
     display: "flex", alignItems: "center", justifyContent: "center"
   },
-  cardBody: {
-    padding: "1.25rem",
-    position: "relative"
-  },
+  cardBody: { padding: "1.25rem", position: "relative" },
   heartBtn: {
-    position: "absolute",
-    top: "10px",
-    right: "10px",
-    background: "transparent",
-    border: "none",
-    fontSize: "1.4rem",
-    cursor: "pointer"
+    position: "absolute", top: "10px", right: "10px",
+    background: "transparent", border: "none",
+    fontSize: "1.4rem", cursor: "pointer"
   },
   cardName: { color: "#ffffff", fontSize: "1rem", fontWeight: "600", marginBottom: "0.5rem" },
   cardPrice: { color: "#7c3aed", fontSize: "1.3rem", fontWeight: "700", marginBottom: "0.25rem" },
