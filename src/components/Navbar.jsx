@@ -53,6 +53,8 @@ export default function Navbar() {
 
             <Link to="/swap-requests" style={styles.link}>🔄 Swaps</Link>
 
+            <Link to="/my-rentals" style={styles.link}>🏠 Rentals</Link>
+
             {user?.activeMode === 'seller' && (
               <Link to="/add-product" style={styles.link}>Add Product</Link>
             )}
@@ -116,6 +118,10 @@ export default function Navbar() {
 
               <Link to="/swap-requests" style={styles.mobileLink} onClick={() => setOpen(false)}>
                 🔄 Swaps
+              </Link>
+
+              <Link to="/my-rentals" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                🏠 Rentals
               </Link>
 
               {user?.activeMode === 'seller' && (

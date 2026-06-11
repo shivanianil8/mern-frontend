@@ -7,13 +7,16 @@ import BASE_URL from "../api.js"
 export default function ProductDetail() {
   const { id }       = useParams()
   const navigate     = useNavigate()
-  const [product, setProduct] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState("")
+  const token        = localStorage.getItem("token")
 
-  useEffect(() => {
-    fetchProduct()
-  }, [id])
+  const [product, setProduct]       = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState("")
+  const [rentDuration, setRentDuration] = useState(1)
+  const [rentSuccess, setRentSuccess]   = useState("")
+  const [rentError, setRentError]       = useState("")
+
+  useEffect(() => { fetchProduct() }, [id])
 
   const fetchProduct = async () => {
     try {
@@ -23,6 +26,22 @@ export default function ProductDetail() {
       setError("Product not found")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRent = async () => {
+    if (!token) { navigate("/login"); return }
+    setRentError("")
+    try {
+      await axios.post(
+        `${BASE_URL}/api/rentals`,
+        { productId: product._id, duration: rentDuration },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      setRentSuccess("Rental confirmed! Redirecting...")
+      setTimeout(() => navigate("/my-rentals"), 1500)
+    } catch (err) {
+      setRentError(err.response?.data?.message || "Failed to rent")
     }
   }
 
@@ -79,13 +98,15 @@ export default function ProductDetail() {
               Seller: {product.addedBy?.name || "Unknown"}
             </div>
 
+            {/* Description Box */}
             <div style={styles.descriptionBox}>
               <h3 style={styles.descriptionTitle}>Description</h3>
               <p style={styles.description}>{product.description}</p>
 
+              {/* Swap Info */}
               {product.openToSwap && (
                 <div style={styles.swapBox}>
-                  <h4 style={{ color: "#ffffff" }}>Open To Swap</h4>
+                  <h4 style={{ color: "#ffffff" }}>🔄 Open To Swap</h4>
                   <p style={{ color: "#a0a0a0" }}>
                     {product.swapPreferences || "No preferences specified"}
                   </p>
@@ -93,6 +114,44 @@ export default function ProductDetail() {
               )}
             </div>
 
+            {/* Rent Box */}
+            {product.rentAvailable && (
+              <div style={styles.rentBox}>
+                <h3 style={styles.rentTitle}>🏠 Available for Rent</h3>
+                <p style={styles.rentPrice}>
+                  ₹{product.rentPrice} / {product.rentPer}
+                </p>
+
+                {rentError   && <p style={styles.rentError}>{rentError}</p>}
+                {rentSuccess && <p style={styles.rentSuccessMsg}>{rentSuccess}</p>}
+
+                <div style={styles.rentForm}>
+                  <label style={styles.rentLabel}>
+                    Duration ({product.rentPer}s)
+                  </label>
+                  <input
+                    style={styles.rentInput}
+                    type="number"
+                    min="1"
+                    value={rentDuration}
+                    onChange={(e) => setRentDuration(Number(e.target.value))}
+                    placeholder={`Enter number of ${product.rentPer}s`}
+                  />
+
+                  {rentDuration > 0 && (
+                    <p style={styles.totalCost}>
+                      Total: ₹{product.rentPrice * rentDuration}
+                    </p>
+                  )}
+
+                  <button style={styles.rentBtn} onClick={handleRent}>
+                    🏠 Rent Now
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
               {product.openToSwap && (
                 <button
@@ -141,7 +200,7 @@ const styles = {
   seller: { color: "#888888", marginBottom: "2rem" },
   descriptionBox: {
     background: "#0a0a0a", border: "1px solid #222222",
-    borderRadius: "12px", padding: "1.5rem", marginBottom: "2rem"
+    borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem"
   },
   descriptionTitle: { color: "#ffffff", marginBottom: "1rem" },
   description: { color: "#b0b0b0", lineHeight: "1.7" },
@@ -149,6 +208,33 @@ const styles = {
     marginTop: "1rem", padding: "1rem",
     border: "1px solid #22c55e30", borderRadius: "10px",
     background: "#22c55e10"
+  },
+  rentBox: {
+    background: "#0a0a0a", border: "1px solid #7c3aed30",
+    borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem"
+  },
+  rentTitle: { color: "#ffffff", marginBottom: "0.5rem", fontSize: "1.1rem" },
+  rentPrice: { color: "#7c3aed", fontSize: "1.5rem", fontWeight: "700", marginBottom: "1rem" },
+  rentForm: { display: "flex", flexDirection: "column", gap: "0.75rem" },
+  rentLabel: { color: "#a0a0a0", fontSize: "0.85rem" },
+  rentInput: {
+    padding: "10px 16px", borderRadius: "10px",
+    border: "1px solid #222222", background: "#111111",
+    color: "#ffffff", fontSize: "1rem", outline: "none"
+  },
+  totalCost: { color: "#22c55e", fontWeight: "700", fontSize: "1.1rem" },
+  rentBtn: {
+    background: "#22c55e", color: "#ffffff", border: "none",
+    padding: "12px 20px", borderRadius: "10px",
+    cursor: "pointer", fontWeight: "600", width: "fit-content"
+  },
+  rentError: {
+    color: "#ef4444", fontSize: "0.85rem",
+    padding: "8px", background: "#ef444410", borderRadius: "8px"
+  },
+  rentSuccessMsg: {
+    color: "#22c55e", fontSize: "0.85rem",
+    padding: "8px", background: "#22c55e10", borderRadius: "8px"
   },
   swapBtn: {
     background: "#22c55e", color: "#ffffff", border: "none",

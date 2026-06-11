@@ -15,7 +15,10 @@ export default function EditProduct() {
     description:     product?.description || "",
     category:        product?.category || "Other",
     openToSwap:      product?.openToSwap || false,
-    swapPreferences: product?.swapPreferences || ""
+    swapPreferences: product?.swapPreferences || "",
+    rentAvailable:   product?.rentAvailable || false,
+    rentPrice:       product?.rentPrice || "",
+    rentPer:         product?.rentPer || "day"
   })
 
   const [error, setError]     = useState("")
@@ -29,11 +32,9 @@ export default function EditProduct() {
       return
     }
 
-    if (name === "price") {
+    if (name === "price" || name === "rentPrice") {
       const n = value.replace(/[^0-9]/g, "")
-      if (n.length <= 7) {
-        setForm({ ...form, price: n })
-      }
+      if (n.length <= 7) setForm({ ...form, [name]: n })
       return
     }
 
@@ -49,6 +50,8 @@ export default function EditProduct() {
       return "Price must be greater than 0"
     if (form.description.trim().length < 10)
       return "Description must be at least 10 characters"
+    if (form.rentAvailable && (!form.rentPrice || Number(form.rentPrice) <= 0))
+      return "Rent price must be greater than 0"
     return null
   }
 
@@ -91,35 +94,21 @@ export default function EditProduct() {
 
             {/* Product Name */}
             <label style={styles.label}>Product Name</label>
-            <input
-              style={styles.input}
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              maxLength={100}
-              required
-            />
+            <input style={styles.input} name="name"
+              value={form.name} onChange={handleChange}
+              maxLength={100} required />
             <small style={styles.hint}>{form.name.length}/100</small>
 
             {/* Price */}
             <label style={styles.label}>Price (₹)</label>
-            <input
-              style={styles.input}
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              inputMode="numeric"
-              required
-            />
+            <input style={styles.input} name="price"
+              value={form.price} onChange={handleChange}
+              inputMode="numeric" required />
 
             {/* Category */}
             <label style={styles.label}>Category</label>
-            <select
-              style={styles.input}
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-            >
+            <select style={styles.input} name="category"
+              value={form.category} onChange={handleChange}>
               <option value="Electronics">Electronics</option>
               <option value="Clothing">Clothing</option>
               <option value="Food">Food</option>
@@ -132,12 +121,8 @@ export default function EditProduct() {
 
             {/* Open to Swap */}
             <label style={styles.checkboxWrap}>
-              <input
-                type="checkbox"
-                name="openToSwap"
-                checked={form.openToSwap}
-                onChange={handleChange}
-              />
+              <input type="checkbox" name="openToSwap"
+                checked={form.openToSwap} onChange={handleChange} />
               <span style={{ marginLeft: "8px" }}>Open to Swap</span>
             </label>
 
@@ -151,6 +136,30 @@ export default function EditProduct() {
                   onChange={handleChange}
                   placeholder="What would you like in exchange?"
                 />
+              </>
+            )}
+
+            {/* Available for Rent */}
+            <label style={styles.checkboxWrap}>
+              <input type="checkbox" name="rentAvailable"
+                checked={form.rentAvailable} onChange={handleChange} />
+              <span style={{ marginLeft: "8px" }}>Available for Rent</span>
+            </label>
+
+            {form.rentAvailable && (
+              <>
+                <label style={styles.label}>Rent Price (₹)</label>
+                <input style={styles.input} name="rentPrice"
+                  placeholder="Enter rent price"
+                  value={form.rentPrice} onChange={handleChange}
+                  inputMode="numeric" />
+
+                <label style={styles.label}>Rent Per</label>
+                <select style={styles.input} name="rentPer"
+                  value={form.rentPer} onChange={handleChange}>
+                  <option value="day">Per Day</option>
+                  <option value="week">Per Week</option>
+                </select>
               </>
             )}
 
