@@ -34,7 +34,7 @@ export default function Navbar() {
 
             <Link to="/add-product" style={styles.link}>Add Product</Link>
 
-            {user?.isSeller ? (
+            {user?.activeMode === 'seller' ? (
               <>
                 <Link to="/seller-dashboard" style={styles.link}>Seller Dashboard</Link>
                 <Link to="/profile" style={styles.link}>Seller Profile</Link>
@@ -42,7 +42,9 @@ export default function Navbar() {
             ) : (
               <>
                 <Link to="/profile" style={styles.link}>Profile</Link>
-                <Link to="/become-seller" style={styles.link}>Become Seller</Link>
+                {!user?.isSeller && (
+                  <Link to="/become-seller" style={styles.link}>Become Seller</Link>
+                )}
               </>
             )}
 
@@ -84,7 +86,7 @@ export default function Navbar() {
                 Add Product
               </Link>
 
-              {user?.isSeller ? (
+              {user?.activeMode === 'seller' ? (
                 <>
                   <Link to="/seller-dashboard" style={styles.mobileLink} onClick={() => setOpen(false)}>
                     Seller Dashboard
@@ -98,9 +100,11 @@ export default function Navbar() {
                   <Link to="/profile" style={styles.mobileLink} onClick={() => setOpen(false)}>
                     Profile
                   </Link>
-                  <Link to="/become-seller" style={styles.mobileLink} onClick={() => setOpen(false)}>
-                    Become Seller
-                  </Link>
+                  {!user?.isSeller && (
+                    <Link to="/become-seller" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                      Become Seller
+                    </Link>
+                  )}
                 </>
               )}
 
