@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import axios from "axios"
+import BASE_URL from "../api.js"
 import "../App.css"
 
 export default function Navbar() {
@@ -14,6 +16,21 @@ export default function Navbar() {
     setOpen(false)
   }
 
+  const switchMode = async () => {
+    const newMode = user?.activeMode === 'seller' ? 'buyer' : 'seller'
+    try {
+      const { data } = await axios.put(
+        `${BASE_URL}/api/auth/switch-mode`,
+        { mode: newMode },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      localStorage.setItem("user", JSON.stringify(data.user))
+      window.location.reload()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
     <nav style={styles.nav}>
       <Link to="/" style={styles.logo}>Vyorra</Link>
@@ -26,6 +43,8 @@ export default function Navbar() {
 
             <Link to="/" style={styles.link}>Home</Link>
 
+            <Link to="/dashboard" style={styles.link}>Dashboard</Link>
+
             <Link to="/products" style={styles.link}>My Products</Link>
 
             <Link to="/wishlist" style={styles.link}>❤️ Wishlist</Link>
@@ -37,12 +56,21 @@ export default function Navbar() {
             {user?.activeMode === 'seller' ? (
               <>
                 <Link to="/seller-dashboard" style={styles.link}>Seller Dashboard</Link>
-                <Link to="/profile" style={styles.link}>Seller Profile</Link>
+                <Link to="/profile" style={styles.link}>Profile</Link>
+                {user?.isSeller && (
+                  <button onClick={switchMode} style={styles.switchBtn}>
+                    👤 Buyer Mode
+                  </button>
+                )}
               </>
             ) : (
               <>
                 <Link to="/profile" style={styles.link}>Profile</Link>
-                {!user?.isSeller && (
+                {user?.isSeller ? (
+                  <button onClick={switchMode} style={styles.switchBtn}>
+                    🏪 Seller Mode
+                  </button>
+                ) : (
                   <Link to="/become-seller" style={styles.link}>Become Seller</Link>
                 )}
               </>
@@ -70,6 +98,10 @@ export default function Navbar() {
             <>
               <span style={styles.mobileWelcome}>Hi, {user?.name}</span>
 
+              <Link to="/dashboard" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                Dashboard
+              </Link>
+
               <Link to="/products" style={styles.mobileLink} onClick={() => setOpen(false)}>
                 My Products
               </Link>
@@ -92,15 +124,24 @@ export default function Navbar() {
                     Seller Dashboard
                   </Link>
                   <Link to="/profile" style={styles.mobileLink} onClick={() => setOpen(false)}>
-                    Seller Profile
+                    Profile
                   </Link>
+                  {user?.isSeller && (
+                    <button onClick={switchMode} style={styles.mobileSwitchBtn}>
+                      👤 Switch to Buyer Mode
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
                   <Link to="/profile" style={styles.mobileLink} onClick={() => setOpen(false)}>
                     Profile
                   </Link>
-                  {!user?.isSeller && (
+                  {user?.isSeller ? (
+                    <button onClick={switchMode} style={styles.mobileSwitchBtn}>
+                      🏪 Switch to Seller Mode
+                    </button>
+                  ) : (
                     <Link to="/become-seller" style={styles.mobileLink} onClick={() => setOpen(false)}>
                       Become Seller
                     </Link>
@@ -142,6 +183,11 @@ const styles = {
     padding: "8px 20px", borderRadius: "8px", cursor: "pointer",
     fontWeight: "600", textDecoration: "none", fontSize: "0.9rem"
   },
+  switchBtn: {
+    background: "#1a1a1a", color: "#a0a0a0", border: "1px solid #333",
+    padding: "6px 14px", borderRadius: "8px", cursor: "pointer",
+    fontSize: "0.85rem"
+  },
   mobileMenu: {
     position: "absolute", top: "100%", left: 0, right: 0,
     background: "#0a0a0a", borderBottom: "1px solid #222222",
@@ -156,6 +202,11 @@ const styles = {
     color: "#a0a0a0", textDecoration: "none",
     fontSize: "1rem", padding: "0.75rem 0",
     borderBottom: "1px solid #1a1a1a", display: "block"
+  },
+  mobileSwitchBtn: {
+    background: "#1a1a1a", color: "#a0a0a0", border: "1px solid #333",
+    padding: "10px", borderRadius: "8px", cursor: "pointer",
+    fontSize: "0.9rem", textAlign: "left", width: "100%"
   },
   mobileBtn: {
     background: "#7c3aed", color: "#ffffff", border: "none",
