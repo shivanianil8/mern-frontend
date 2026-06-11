@@ -36,3 +36,9 @@ nav a:hover {
 h1 {
   margin-bottom: 15px;
 }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
