@@ -63,11 +63,27 @@ export default function EditProduct() {
 
     const token = localStorage.getItem("token")
 
+    const formData = new FormData()
+    formData.append("name", form.name)
+    formData.append("price", form.price)
+    formData.append("description", form.description)
+    formData.append("category", form.category)
+    formData.append("openToSwap", form.openToSwap)
+    formData.append("swapPreferences", form.swapPreferences)
+    formData.append("rentAvailable", form.rentAvailable)
+    formData.append("rentPrice", form.rentPrice)
+    formData.append("rentPer", form.rentPer)
+
     try {
       await axios.put(
         `${BASE_URL}/api/products/${product._id}`,
-        form,
-        { headers: { Authorization: `Bearer ${token}` } }
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data"
+          }
+        }
       )
       setSuccess("Product updated!")
       setTimeout(() => navigate("/products"), 1500)
