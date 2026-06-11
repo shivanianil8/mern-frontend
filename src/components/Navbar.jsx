@@ -10,6 +10,9 @@ export default function Navbar() {
   const user            = JSON.parse(localStorage.getItem("user"))
   const [open, setOpen] = useState(false)
 
+  const cart    = JSON.parse(localStorage.getItem("cart") || "[]")
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+
   const handleLogout = () => {
     localStorage.clear()
     navigate("/login")
@@ -54,6 +57,12 @@ export default function Navbar() {
             <Link to="/swap-requests" style={styles.link}>🔄 Swaps</Link>
 
             <Link to="/my-rentals" style={styles.link}>🏠 Rentals</Link>
+
+            <Link to="/my-orders" style={styles.link}>📦 Orders</Link>
+
+            <Link to="/cart" style={styles.cartLink}>
+              🛒 Cart {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
+            </Link>
 
             {user?.activeMode === 'seller' && (
               <Link to="/add-product" style={styles.link}>Add Product</Link>
@@ -124,6 +133,14 @@ export default function Navbar() {
                 🏠 Rentals
               </Link>
 
+              <Link to="/my-orders" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                📦 Orders
+              </Link>
+
+              <Link to="/cart" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                🛒 Cart {cartCount > 0 && `(${cartCount})`}
+              </Link>
+
               {user?.activeMode === 'seller' && (
                 <Link to="/add-product" style={styles.mobileLink} onClick={() => setOpen(false)}>
                   Add Product
@@ -187,6 +204,18 @@ const styles = {
     letterSpacing: "3px", textTransform: "uppercase"
   },
   link: { color: "#a0a0a0", textDecoration: "none", fontSize: "0.9rem" },
+  cartLink: {
+    color: "#a0a0a0", textDecoration: "none",
+    fontSize: "0.9rem", position: "relative",
+    display: "flex", alignItems: "center", gap: "4px"
+  },
+  cartBadge: {
+    background: "#7c3aed", color: "#ffffff",
+    borderRadius: "50%", width: "18px", height: "18px",
+    fontSize: "0.7rem", display: "flex",
+    alignItems: "center", justifyContent: "center",
+    fontWeight: "700"
+  },
   welcome: { color: "#555555", fontSize: "0.85rem" },
   btn: {
     background: "#7c3aed", color: "#ffffff", border: "none",

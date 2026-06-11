@@ -17,6 +17,9 @@ import ResetPassword from "./pages/ResetPassword"
 import ProposeSwap from "./pages/ProposeSwap"
 import SwapRequests from "./pages/SwapRequests"
 import MyRentals from "./pages/MyRentals"
+import Cart from "./pages/Cart"
+import MyOrders from "./pages/MyOrders"
+import OrderConfirm from "./pages/OrderConfirm"
 
 function getUser() {
   try {
@@ -75,13 +78,16 @@ export default function App() {
       <Route path="/become-seller" element={<BuyerOnlyRoute><BecomeSeller /></BuyerOnlyRoute>} />
 
       {/* Protected */}
-      <Route path="/profile-setup" element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
-      <Route path="/dashboard"     element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/profile"       element={<PrivateRoute><Profile /></PrivateRoute>} />
-      <Route path="/add-product"   element={<PrivateRoute><AddProduct /></PrivateRoute>} />
-      <Route path="/products"      element={<PrivateRoute><ProductList /></PrivateRoute>} />
-      <Route path="/wishlist"      element={<PrivateRoute><Wishlist /></PrivateRoute>} />
-      <Route path="/my-rentals"    element={<PrivateRoute><MyRentals /></PrivateRoute>} />
+      <Route path="/profile-setup"    element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
+      <Route path="/dashboard"        element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/profile"          element={<PrivateRoute><Profile /></PrivateRoute>} />
+      <Route path="/add-product"      element={<PrivateRoute><AddProduct /></PrivateRoute>} />
+      <Route path="/products"         element={<PrivateRoute><ProductList /></PrivateRoute>} />
+      <Route path="/wishlist"         element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+      <Route path="/my-rentals"       element={<PrivateRoute><MyRentals /></PrivateRoute>} />
+      <Route path="/cart"             element={<PrivateRoute><Cart /></PrivateRoute>} />
+      <Route path="/my-orders"        element={<PrivateRoute><MyOrders /></PrivateRoute>} />
+      <Route path="/order-confirm"    element={<PrivateRoute><OrderConfirm /></PrivateRoute>} />
       <Route path="/edit-product/:id" element={<PrivateRoute><EditProduct /></PrivateRoute>} />
 
       {/* Seller only */}

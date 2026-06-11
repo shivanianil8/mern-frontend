@@ -9,12 +9,13 @@ export default function ProductDetail() {
   const navigate     = useNavigate()
   const token        = localStorage.getItem("token")
 
-  const [product, setProduct]       = useState(null)
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState("")
+  const [product, setProduct]           = useState(null)
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState("")
   const [rentDuration, setRentDuration] = useState(1)
   const [rentSuccess, setRentSuccess]   = useState("")
   const [rentError, setRentError]       = useState("")
+  const [cartMsg, setCartMsg]           = useState("")
 
   useEffect(() => { fetchProduct() }, [id])
 
@@ -43,6 +44,35 @@ export default function ProductDetail() {
     } catch (err) {
       setRentError(err.response?.data?.message || "Failed to rent")
     }
+  }
+
+  const handleAddToCart = () => {
+    if (!token) { navigate("/login"); return }
+
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]")
+
+    const exists = cart.find(item => item.productId === product._id)
+
+    if (exists) {
+      const updated = cart.map(item =>
+        item.productId === product._id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+      localStorage.setItem("cart", JSON.stringify(updated))
+    } else {
+      cart.push({
+        productId: product._id,
+        name:      product.name,
+        price:     product.price,
+        image:     product.image,
+        quantity:  1
+      })
+      localStorage.setItem("cart", JSON.stringify(cart))
+    }
+
+    setCartMsg("Added to cart!")
+    setTimeout(() => setCartMsg(""), 2000)
   }
 
   if (loading) {
@@ -96,6 +126,17 @@ export default function ProductDetail() {
 
             <div style={styles.seller}>
               Seller: {product.addedBy?.name || "Unknown"}
+            </div>
+
+            {/* Add to Cart */}
+            {cartMsg && <p style={styles.cartMsg}>{cartMsg}</p>}
+            <div style={styles.cartRow}>
+              <button style={styles.cartBtn} onClick={handleAddToCart}>
+                🛒 Add to Cart
+              </button>
+              <button style={styles.viewCartBtn} onClick={() => navigate("/cart")}>
+                View Cart
+              </button>
             </div>
 
             {/* Description Box */}
@@ -197,7 +238,22 @@ const styles = {
   category: { color: "#7c3aed", fontSize: "0.9rem", marginBottom: "1rem" },
   title: { color: "#ffffff", fontSize: "2.5rem", fontWeight: "700", marginBottom: "1rem" },
   price: { color: "#7c3aed", fontSize: "2rem", fontWeight: "700", marginBottom: "1.5rem" },
-  seller: { color: "#888888", marginBottom: "2rem" },
+  seller: { color: "#888888", marginBottom: "1rem" },
+  cartMsg: {
+    color: "#22c55e", fontSize: "0.85rem", marginBottom: "0.5rem",
+    padding: "8px", background: "#22c55e10", borderRadius: "8px"
+  },
+  cartRow: { display: "flex", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" },
+  cartBtn: {
+    background: "#7c3aed", color: "#ffffff", border: "none",
+    padding: "12px 24px", borderRadius: "10px",
+    cursor: "pointer", fontWeight: "600", fontSize: "1rem"
+  },
+  viewCartBtn: {
+    background: "transparent", color: "#a0a0a0",
+    border: "1px solid #333333", padding: "12px 24px",
+    borderRadius: "10px", cursor: "pointer", fontWeight: "600"
+  },
   descriptionBox: {
     background: "#0a0a0a", border: "1px solid #222222",
     borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem"
