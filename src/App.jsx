@@ -20,6 +20,7 @@ import MyRentals from "./pages/MyRentals"
 import Cart from "./pages/Cart"
 import MyOrders from "./pages/MyOrders"
 import OrderConfirm from "./pages/OrderConfirm"
+import NotFound from "./pages/NotFound"
 
 function getUser() {
   try {
@@ -100,7 +101,9 @@ export default function App() {
       <Route path="/propose-swap/:id" element={<PrivateRoute><ProposeSwap /></PrivateRoute>} />
       <Route path="/swap-requests"    element={<PrivateRoute><SwapRequests /></PrivateRoute>} />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      
+
+<Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
