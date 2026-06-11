@@ -30,6 +30,8 @@ export default function Navbar() {
 
             <Link to="/wishlist" style={styles.link}>❤️ Wishlist</Link>
 
+            <Link to="/swap-requests" style={styles.link}>🔄 Swaps</Link>
+
             <Link to="/add-product" style={styles.link}>Add Product</Link>
 
             {user?.isSeller ? (
@@ -70,13 +72,13 @@ export default function Navbar() {
                 My Products
               </Link>
 
-              <Link
-  to="/wishlist"
-  style={styles.mobileLink}
-  onClick={() => setOpen(false)}
->
-  ❤️ Wishlist
-</Link>
+              <Link to="/wishlist" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                ❤️ Wishlist
+              </Link>
+
+              <Link to="/swap-requests" style={styles.mobileLink} onClick={() => setOpen(false)}>
+                🔄 Swaps
+              </Link>
 
               <Link to="/add-product" style={styles.mobileLink} onClick={() => setOpen(false)}>
                 Add Product

@@ -14,6 +14,8 @@ import BecomeSeller from "./pages/BecomeSeller"
 import SellerDashboard from "./pages/SellerDashboard"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
+import ProposeSwap from "./pages/ProposeSwap"
+import SwapRequests from "./pages/SwapRequests"
 
 function getUser() {
   try {
@@ -37,160 +39,60 @@ function PublicRoute({ children }) {
 
 function SellerRoute({ children }) {
   const user = getUser()
-
   if (!localStorage.getItem("token")) {
     return <Navigate to="/login" replace />
   }
-
   if (!user?.isSeller) {
     return <Navigate to="/become-seller" replace />
   }
-
   return children
 }
 
 function BuyerOnlyRoute({ children }) {
   const user = getUser()
-
   if (!localStorage.getItem("token")) {
     return <Navigate to="/login" replace />
   }
-
   if (user?.isSeller) {
     return <Navigate to="/seller-dashboard" replace />
   }
-
   return children
 }
 
 export default function App() {
   return (
     <Routes>
-
       <Route path="/" element={<Home />} />
 
       {/* Public only */}
-      <Route
-        path="/signup"
-        element={
-          <PublicRoute>
-            <Signup />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/forgot-password"
-        element={<ForgotPassword />}
-      />
-
-      <Route
-        path="/reset-password/:token"
-        element={<ResetPassword />}
-      />
+      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+      <Route path="/login"  element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/forgot-password"       element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       {/* Buyer only */}
-      <Route
-        path="/become-seller"
-        element={
-          <BuyerOnlyRoute>
-            <BecomeSeller />
-          </BuyerOnlyRoute>
-        }
-      />
+      <Route path="/become-seller" element={<BuyerOnlyRoute><BecomeSeller /></BuyerOnlyRoute>} />
 
       {/* Protected */}
-      <Route
-        path="/profile-setup"
-        element={
-          <PrivateRoute>
-            <ProfileSetup />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/profile"
-        element={
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/add-product"
-        element={
-          <PrivateRoute>
-            <AddProduct />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/products"
-        element={
-          <PrivateRoute>
-            <ProductList />
-          </PrivateRoute>
-        }
-      />
-
-<Route
-  path="/wishlist"
-  element={
-    <PrivateRoute>
-      <Wishlist />
-    </PrivateRoute>
-  }
-/>
-      <Route
-        path="/edit-product/:id"
-        element={
-          <PrivateRoute>
-            <EditProduct />
-          </PrivateRoute>
-        }
-      />
+      <Route path="/profile-setup" element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
+      <Route path="/dashboard"     element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/profile"       element={<PrivateRoute><Profile /></PrivateRoute>} />
+      <Route path="/add-product"   element={<PrivateRoute><AddProduct /></PrivateRoute>} />
+      <Route path="/products"      element={<PrivateRoute><ProductList /></PrivateRoute>} />
+      <Route path="/wishlist"      element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+      <Route path="/edit-product/:id" element={<PrivateRoute><EditProduct /></PrivateRoute>} />
 
       {/* Seller only */}
-      <Route
-        path="/seller-dashboard"
-        element={
-          <SellerRoute>
-            <SellerDashboard />
-          </SellerRoute>
-        }
-      />
+      <Route path="/seller-dashboard" element={<SellerRoute><SellerDashboard /></SellerRoute>} />
 
-      {/* Product Details */}
-      <Route
-        path="/product/:id"
-        element={<ProductDetail />}
-      />
+      {/* Product Detail */}
+      <Route path="/product/:id" element={<ProductDetail />} />
 
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
+      {/* Swap */}
+      <Route path="/propose-swap/:id" element={<PrivateRoute><ProposeSwap /></PrivateRoute>} />
+      <Route path="/swap-requests"    element={<PrivateRoute><SwapRequests /></PrivateRoute>} />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

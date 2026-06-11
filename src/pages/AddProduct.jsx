@@ -9,13 +9,15 @@ export default function AddProduct() {
     name: "",
     price: "",
     description: "",
-    category: "Other"
+    category: "Other",
+    openToSwap: false,
+    swapPreferences: ""
   })
 
-  const [image, setImage] = useState(null)
-  const [preview, setPreview] = useState(null)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [image, setImage]         = useState(null)
+  const [preview, setPreview]     = useState(null)
+  const [error, setError]         = useState("")
+  const [success, setSuccess]     = useState("")
   const [showPopup, setShowPopup] = useState(false)
 
   const navigate = useNavigate()
@@ -29,13 +31,8 @@ export default function AddProduct() {
     try {
       const { data } = await axios.get(
         `${BASE_URL}/api/auth/profile`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
-
       if (!data.user.isProfileComplete) {
         setShowPopup(true)
       }
@@ -45,7 +42,12 @@ export default function AddProduct() {
   }
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
+
+    if (type === "checkbox") {
+      setForm({ ...form, [name]: checked })
+      return
+    }
 
     if (name === "price") {
       const n = value.replace(/[^0-9]/g, "")
@@ -57,15 +59,11 @@ export default function AddProduct() {
 
     if (name === "name" && value.length > 100) return
 
-    setForm({
-      ...form,
-      [name]: value
-    })
+    setForm({ ...form, [name]: value })
   }
 
   const handleImage = (e) => {
     const file = e.target.files[0]
-
     if (file) {
       setImage(file)
       setPreview(URL.createObjectURL(file))
@@ -75,38 +73,27 @@ export default function AddProduct() {
   const validate = () => {
     if (form.name.trim().length < 2)
       return "Product name must be at least 2 characters"
-
     if (!form.price || Number(form.price) <= 0)
       return "Price must be greater than 0"
-
     if (form.description.trim().length < 10)
       return "Description must be at least 10 characters"
-
     return null
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     const err = validate()
-
-    if (err) {
-      setError(err)
-      return
-    }
-
+    if (err) { setError(err); return }
     setError("")
 
     const formData = new FormData()
-
     formData.append("name", form.name)
     formData.append("price", form.price)
     formData.append("description", form.description)
     formData.append("category", form.category)
-
-    if (image) {
-      formData.append("image", image)
-    }
+    formData.append("openToSwap", form.openToSwap)
+    formData.append("swapPreferences", form.swapPreferences)
+    if (image) formData.append("image", image)
 
     try {
       await axios.post(
@@ -119,14 +106,10 @@ export default function AddProduct() {
           }
         }
       )
-
       setSuccess("Product added!")
       setTimeout(() => navigate("/products"), 1500)
-
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Failed"
-      )
+      setError(err.response?.data?.message || "Failed")
     }
   }
 
@@ -138,32 +121,16 @@ export default function AddProduct() {
         <div style={styles.overlay}>
           <div style={styles.popup}>
             <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>👤</div>
-
             <h3 style={{ color: "#ffffff", marginBottom: "0.5rem" }}>
               Complete Your Profile
             </h3>
-
-            <p
-              style={{
-                color: "#555555",
-                marginBottom: "1.5rem",
-                fontSize: "0.9rem"
-              }}
-            >
+            <p style={{ color: "#555555", marginBottom: "1.5rem", fontSize: "0.9rem" }}>
               Add your phone and address to start listing products.
             </p>
-
-            <button
-              style={styles.popupBtn}
-              onClick={() => navigate("/profile")}
-            >
+            <button style={styles.popupBtn} onClick={() => navigate("/profile")}>
               Complete Profile
             </button>
-
-            <button
-              style={styles.popupSkip}
-              onClick={() => setShowPopup(false)}
-            >
+            <button style={styles.popupSkip} onClick={() => setShowPopup(false)}>
               Skip for now
             </button>
           </div>
@@ -177,49 +144,32 @@ export default function AddProduct() {
         </div>
 
         <div style={styles.card}>
-          {error && <p style={styles.error}>{error}</p>}
+          {error   && <p style={styles.error}>{error}</p>}
           {success && <p style={styles.success}>{success}</p>}
 
           <form onSubmit={handleSubmit}>
 
-            <label style={styles.label}>
-              Product Image (optional)
-            </label>
-
+            {/* Image Upload */}
+            <label style={styles.label}>Product Image (optional)</label>
             <div
               style={styles.imageUpload}
-              onClick={() =>
-                document.getElementById("imageInput").click()
-              }
+              onClick={() => document.getElementById("imageInput").click()}
             >
               {preview ? (
                 <img
                   src={preview}
                   alt="preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "10px"
-                  }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }}
                 />
               ) : (
                 <div style={styles.uploadPlaceholder}>
                   <span style={{ fontSize: "2rem" }}>📷</span>
-
-                  <p
-                    style={{
-                      color: "#555555",
-                      fontSize: "0.85rem",
-                      marginTop: "0.5rem"
-                    }}
-                  >
+                  <p style={{ color: "#555555", fontSize: "0.85rem", marginTop: "0.5rem" }}>
                     Click to upload image
                   </p>
                 </div>
               )}
             </div>
-
             <input
               id="imageInput"
               type="file"
@@ -228,8 +178,8 @@ export default function AddProduct() {
               style={{ display: "none" }}
             />
 
+            {/* Product Name */}
             <label style={styles.label}>Product Name</label>
-
             <input
               style={styles.input}
               name="name"
@@ -239,13 +189,10 @@ export default function AddProduct() {
               maxLength={100}
               required
             />
+            <small style={styles.hint}>{form.name.length}/100</small>
 
-            <small style={styles.hint}>
-              {form.name.length}/100
-            </small>
-
+            {/* Price */}
             <label style={styles.label}>Price (₹)</label>
-
             <input
               style={styles.input}
               name="price"
@@ -256,8 +203,8 @@ export default function AddProduct() {
               required
             />
 
+            {/* Category */}
             <label style={styles.label}>Category</label>
-
             <select
               style={styles.input}
               name="category"
@@ -274,37 +221,44 @@ export default function AddProduct() {
               <option value="Other">Other</option>
             </select>
 
-            <label style={styles.label}>Description</label>
+            {/* Open to Swap */}
+            <label style={styles.checkboxWrap}>
+              <input
+                type="checkbox"
+                name="openToSwap"
+                checked={form.openToSwap}
+                onChange={handleChange}
+              />
+              <span style={{ marginLeft: "8px" }}>Open to Swap</span>
+            </label>
 
+            {form.openToSwap && (
+              <>
+                <label style={styles.label}>Swap Preferences</label>
+                <textarea
+                  style={{ ...styles.input, minHeight: "80px", resize: "vertical" }}
+                  name="swapPreferences"
+                  placeholder="What would you like in exchange?"
+                  value={form.swapPreferences}
+                  onChange={handleChange}
+                />
+              </>
+            )}
+
+            {/* Description */}
+            <label style={styles.label}>Description</label>
             <textarea
-              style={{
-                ...styles.input,
-                minHeight: "120px",
-                resize: "vertical"
-              }}
+              style={{ ...styles.input, minHeight: "120px", resize: "vertical" }}
               name="description"
               placeholder="Enter product description"
               value={form.description}
               onChange={handleChange}
               required
             />
+            <small style={styles.hint}>{form.description.length} characters</small>
 
-            <small style={styles.hint}>
-              {form.description.length} characters
-            </small>
-
-            <button
-              style={styles.button}
-              type="submit"
-            >
-              Add Product
-            </button>
-
-            <button
-              style={styles.cancel}
-              type="button"
-              onClick={() => navigate("/products")}
-            >
+            <button style={styles.button} type="submit">Add Product</button>
+            <button style={styles.cancel} type="button" onClick={() => navigate("/products")}>
               Cancel
             </button>
           </form>
@@ -316,143 +270,64 @@ export default function AddProduct() {
 
 const styles = {
   overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0,0,0,0.8)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 999
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    background: "rgba(0,0,0,0.8)", display: "flex",
+    justifyContent: "center", alignItems: "center", zIndex: 999
   },
   popup: {
-    background: "#111111",
-    padding: "2.5rem",
-    borderRadius: "16px",
-    textAlign: "center",
-    width: "360px",
-    border: "1px solid #222222"
+    background: "#111111", padding: "2.5rem", borderRadius: "16px",
+    textAlign: "center", width: "360px", border: "1px solid #222222"
   },
   popupBtn: {
-    width: "100%",
-    padding: "12px",
-    background: "#7c3aed",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "10px",
-    cursor: "pointer",
-    marginBottom: "8px",
-    fontWeight: "600"
+    width: "100%", padding: "12px", background: "#7c3aed",
+    color: "#ffffff", border: "none", borderRadius: "10px",
+    cursor: "pointer", marginBottom: "8px", fontWeight: "600"
   },
   popupSkip: {
-    width: "100%",
-    padding: "12px",
-    background: "transparent",
-    color: "#555555",
-    border: "1px solid #222222",
-    borderRadius: "10px",
-    cursor: "pointer"
+    width: "100%", padding: "12px", background: "transparent",
+    color: "#555555", border: "1px solid #222222",
+    borderRadius: "10px", cursor: "pointer"
   },
-  container: {
-    maxWidth: "500px",
-    margin: "0 auto",
-    padding: "4rem 2rem"
-  },
-  header: {
-    marginBottom: "2rem"
-  },
-  title: {
-    color: "#ffffff",
-    fontSize: "2rem",
-    fontWeight: "700",
-    marginBottom: "0.5rem"
-  },
-  subtitle: {
-    color: "#555555",
-    fontSize: "0.9rem"
-  },
-  card: {
-    background: "#111111",
-    borderRadius: "16px",
-    padding: "2rem",
-    border: "1px solid #222222"
-  },
+  container: { maxWidth: "500px", margin: "0 auto", padding: "4rem 2rem" },
+  header: { marginBottom: "2rem" },
+  title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.5rem" },
+  subtitle: { color: "#555555", fontSize: "0.9rem" },
+  card: { background: "#111111", borderRadius: "16px", padding: "2rem", border: "1px solid #222222" },
   imageUpload: {
-    width: "100%",
-    height: "200px",
-    borderRadius: "10px",
-    border: "2px dashed #222222",
-    marginBottom: "20px",
-    cursor: "pointer",
-    overflow: "hidden",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
+    width: "100%", height: "200px", borderRadius: "10px",
+    border: "2px dashed #222222", marginBottom: "20px",
+    cursor: "pointer", overflow: "hidden",
+    display: "flex", alignItems: "center", justifyContent: "center"
   },
-  uploadPlaceholder: {
-    textAlign: "center"
-  },
-  label: {
-    display: "block",
-    color: "#a0a0a0",
-    fontSize: "0.85rem",
-    marginBottom: "8px"
+  uploadPlaceholder: { textAlign: "center" },
+  label: { display: "block", color: "#a0a0a0", fontSize: "0.85rem", marginBottom: "8px" },
+  checkboxWrap: {
+    display: "flex", alignItems: "center",
+    color: "#ffffff", marginBottom: "20px"
   },
   input: {
-    width: "100%",
-    padding: "12px 16px",
-    margin: "0 0 12px 0",
-    borderRadius: "10px",
-    border: "1px solid #222222",
-    background: "#0a0a0a",
-    color: "#ffffff",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    outline: "none"
+    width: "100%", padding: "12px 16px", margin: "0 0 12px 0",
+    borderRadius: "10px", border: "1px solid #222222",
+    background: "#0a0a0a", color: "#ffffff", fontSize: "1rem",
+    boxSizing: "border-box", outline: "none"
   },
-  hint: {
-    color: "#333333",
-    fontSize: "0.75rem",
-    display: "block",
-    marginBottom: "20px"
-  },
+  hint: { color: "#333333", fontSize: "0.75rem", display: "block", marginBottom: "20px" },
   button: {
-    width: "100%",
-    padding: "14px",
-    background: "#7c3aed",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontWeight: "600",
-    marginTop: "1rem"
+    width: "100%", padding: "14px", background: "#7c3aed",
+    color: "#ffffff", border: "none", borderRadius: "10px",
+    cursor: "pointer", fontWeight: "600", marginTop: "1rem"
   },
   cancel: {
-    width: "100%",
-    padding: "14px",
-    background: "transparent",
-    color: "#555555",
-    border: "1px solid #222222",
-    borderRadius: "10px",
-    cursor: "pointer",
-    marginTop: "8px"
+    width: "100%", padding: "14px", background: "transparent",
+    color: "#555555", border: "1px solid #222222",
+    borderRadius: "10px", cursor: "pointer", marginTop: "8px"
   },
   error: {
-    color: "#ef4444",
-    fontSize: "0.85rem",
-    marginBottom: "1rem",
-    padding: "10px",
-    background: "#ef444410",
-    borderRadius: "8px"
+    color: "#ef4444", fontSize: "0.85rem", marginBottom: "1rem",
+    padding: "10px", background: "#ef444410", borderRadius: "8px"
   },
   success: {
-    color: "#22c55e",
-    fontSize: "0.85rem",
-    marginBottom: "1rem",
-    padding: "10px",
-    background: "#22c55e10",
-    borderRadius: "8px"
+    color: "#22c55e", fontSize: "0.85rem", marginBottom: "1rem",
+    padding: "10px", background: "#22c55e10", borderRadius: "8px"
   }
 }

@@ -5,22 +5,29 @@ import Navbar from "../components/Navbar"
 import BASE_URL from "../api.js"
 
 export default function EditProduct() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const product = location.state
+  const navigate  = useNavigate()
+  const location  = useLocation()
+  const product   = location.state
 
   const [form, setForm] = useState({
-    name: product?.name || "",
-    price: product?.price || "",
-    description: product?.description || "",
-    category: product?.category || "Other"
+    name:            product?.name || "",
+    price:           product?.price || "",
+    description:     product?.description || "",
+    category:        product?.category || "Other",
+    openToSwap:      product?.openToSwap || false,
+    swapPreferences: product?.swapPreferences || ""
   })
 
-  const [error, setError] = useState("")
+  const [error, setError]     = useState("")
   const [success, setSuccess] = useState("")
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
+
+    if (type === "checkbox") {
+      setForm({ ...form, [name]: checked })
+      return
+    }
 
     if (name === "price") {
       const n = value.replace(/[^0-9]/g, "")
@@ -32,35 +39,23 @@ export default function EditProduct() {
 
     if (name === "name" && value.length > 100) return
 
-    setForm({
-      ...form,
-      [name]: value
-    })
+    setForm({ ...form, [name]: value })
   }
 
   const validate = () => {
     if (form.name.trim().length < 2)
       return "Product name must be at least 2 characters"
-
     if (!form.price || Number(form.price) <= 0)
       return "Price must be greater than 0"
-
     if (form.description.trim().length < 10)
       return "Description must be at least 10 characters"
-
     return null
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     const err = validate()
-
-    if (err) {
-      setError(err)
-      return
-    }
-
+    if (err) { setError(err); return }
     setError("")
 
     const token = localStorage.getItem("token")
@@ -69,20 +64,12 @@ export default function EditProduct() {
       await axios.put(
         `${BASE_URL}/api/products/${product._id}`,
         form,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
-
       setSuccess("Product updated!")
       setTimeout(() => navigate("/products"), 1500)
-
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Failed"
-      )
+      setError(err.response?.data?.message || "Failed")
     }
   }
 
@@ -93,21 +80,17 @@ export default function EditProduct() {
       <div style={styles.container}>
         <div style={styles.header}>
           <h2 style={styles.title}>Edit Product</h2>
-          <p style={styles.subtitle}>
-            Update your product details
-          </p>
+          <p style={styles.subtitle}>Update your product details</p>
         </div>
 
         <div style={styles.card}>
-          {error && <p style={styles.error}>{error}</p>}
+          {error   && <p style={styles.error}>{error}</p>}
           {success && <p style={styles.success}>{success}</p>}
 
           <form onSubmit={handleSubmit}>
 
-            <label style={styles.label}>
-              Product Name
-            </label>
-
+            {/* Product Name */}
+            <label style={styles.label}>Product Name</label>
             <input
               style={styles.input}
               name="name"
@@ -116,15 +99,10 @@ export default function EditProduct() {
               maxLength={100}
               required
             />
+            <small style={styles.hint}>{form.name.length}/100</small>
 
-            <small style={styles.hint}>
-              {form.name.length}/100
-            </small>
-
-            <label style={styles.label}>
-              Price (₹)
-            </label>
-
+            {/* Price */}
+            <label style={styles.label}>Price (₹)</label>
             <input
               style={styles.input}
               name="price"
@@ -134,10 +112,8 @@ export default function EditProduct() {
               required
             />
 
-            <label style={styles.label}>
-              Category
-            </label>
-
+            {/* Category */}
+            <label style={styles.label}>Category</label>
             <select
               style={styles.input}
               name="category"
@@ -154,41 +130,45 @@ export default function EditProduct() {
               <option value="Other">Other</option>
             </select>
 
-            <label style={styles.label}>
-              Description
+            {/* Open to Swap */}
+            <label style={styles.checkboxWrap}>
+              <input
+                type="checkbox"
+                name="openToSwap"
+                checked={form.openToSwap}
+                onChange={handleChange}
+              />
+              <span style={{ marginLeft: "8px" }}>Open to Swap</span>
             </label>
 
+            {form.openToSwap && (
+              <>
+                <label style={styles.label}>Swap Preferences</label>
+                <textarea
+                  style={{ ...styles.input, minHeight: "80px", resize: "vertical" }}
+                  name="swapPreferences"
+                  value={form.swapPreferences}
+                  onChange={handleChange}
+                  placeholder="What would you like in exchange?"
+                />
+              </>
+            )}
+
+            {/* Description */}
+            <label style={styles.label}>Description</label>
             <textarea
-              style={{
-                ...styles.input,
-                minHeight: "120px",
-                resize: "vertical"
-              }}
+              style={{ ...styles.input, minHeight: "120px", resize: "vertical" }}
               name="description"
               value={form.description}
               onChange={handleChange}
               required
             />
+            <small style={styles.hint}>{form.description.length} characters</small>
 
-            <small style={styles.hint}>
-              {form.description.length} characters
-            </small>
-
-            <button
-              style={styles.button}
-              type="submit"
-            >
-              Save Changes
-            </button>
-
-            <button
-              style={styles.cancel}
-              type="button"
-              onClick={() => navigate("/products")}
-            >
+            <button style={styles.button} type="submit">Save Changes</button>
+            <button style={styles.cancel} type="button" onClick={() => navigate("/products")}>
               Cancel
             </button>
-
           </form>
         </div>
       </div>
@@ -197,100 +177,39 @@ export default function EditProduct() {
 }
 
 const styles = {
-  container: {
-    maxWidth: "500px",
-    margin: "0 auto",
-    padding: "4rem 2rem"
+  container: { maxWidth: "500px", margin: "0 auto", padding: "4rem 2rem" },
+  header: { marginBottom: "2rem" },
+  title: { color: "#ffffff", fontSize: "2rem", fontWeight: "700", marginBottom: "0.5rem" },
+  subtitle: { color: "#555555", fontSize: "0.9rem" },
+  card: { background: "#111111", borderRadius: "16px", padding: "2rem", border: "1px solid #222222" },
+  label: { display: "block", color: "#a0a0a0", fontSize: "0.85rem", marginBottom: "8px" },
+  checkboxWrap: {
+    display: "flex", alignItems: "center",
+    color: "#ffffff", marginBottom: "20px"
   },
-
-  header: {
-    marginBottom: "2rem"
-  },
-
-  title: {
-    color: "#ffffff",
-    fontSize: "2rem",
-    fontWeight: "700",
-    marginBottom: "0.5rem"
-  },
-
-  subtitle: {
-    color: "#555555",
-    fontSize: "0.9rem"
-  },
-
-  card: {
-    background: "#111111",
-    borderRadius: "16px",
-    padding: "2rem",
-    border: "1px solid #222222"
-  },
-
-  label: {
-    display: "block",
-    color: "#a0a0a0",
-    fontSize: "0.85rem",
-    marginBottom: "8px"
-  },
-
   input: {
-    width: "100%",
-    padding: "12px 16px",
-    margin: "0 0 12px 0",
-    borderRadius: "10px",
-    border: "1px solid #222222",
-    background: "#0a0a0a",
-    color: "#ffffff",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    outline: "none"
+    width: "100%", padding: "12px 16px", margin: "0 0 12px 0",
+    borderRadius: "10px", border: "1px solid #222222",
+    background: "#0a0a0a", color: "#ffffff", fontSize: "1rem",
+    boxSizing: "border-box", outline: "none"
   },
-
-  hint: {
-    color: "#333333",
-    fontSize: "0.75rem",
-    display: "block",
-    marginBottom: "20px"
-  },
-
+  hint: { color: "#333333", fontSize: "0.75rem", display: "block", marginBottom: "20px" },
   button: {
-    width: "100%",
-    padding: "14px",
-    background: "#7c3aed",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontWeight: "600",
-    marginTop: "1rem"
+    width: "100%", padding: "14px", background: "#7c3aed",
+    color: "#ffffff", border: "none", borderRadius: "10px",
+    cursor: "pointer", fontWeight: "600", marginTop: "1rem"
   },
-
   cancel: {
-    width: "100%",
-    padding: "14px",
-    background: "transparent",
-    color: "#555555",
-    border: "1px solid #222222",
-    borderRadius: "10px",
-    cursor: "pointer",
-    marginTop: "8px"
+    width: "100%", padding: "14px", background: "transparent",
+    color: "#555555", border: "1px solid #222222",
+    borderRadius: "10px", cursor: "pointer", marginTop: "8px"
   },
-
   error: {
-    color: "#ef4444",
-    fontSize: "0.85rem",
-    marginBottom: "1rem",
-    padding: "10px",
-    background: "#ef444410",
-    borderRadius: "8px"
+    color: "#ef4444", fontSize: "0.85rem", marginBottom: "1rem",
+    padding: "10px", background: "#ef444410", borderRadius: "8px"
   },
-
   success: {
-    color: "#22c55e",
-    fontSize: "0.85rem",
-    marginBottom: "1rem",
-    padding: "10px",
-    background: "#22c55e10",
-    borderRadius: "8px"
+    color: "#22c55e", fontSize: "0.85rem", marginBottom: "1rem",
+    padding: "10px", background: "#22c55e10", borderRadius: "8px"
   }
 }
